@@ -31,19 +31,19 @@ FOREIGN KEY(subscription) REFERENCES subscriptions(ID)
 // INSERT INTO subscriptions(suburl) VALUES ("https://www.youtube.com/user/durianriders");
 // INSERT INTO subscriptions(suburl) VALUES ("https://www.youtube.com/channel/UCYdkEm-NjhS8TmLVt_qZy9g");
 
+// YTSubscription is just the URL of each YouTuber you are subscribed to
 type YTSubscription struct {
 	SubID  int64  `db:"ID"`
 	SubURL string `db:"suburl"`
 }
 
+// YTSubscriptionEntry has info about each of the parsed and downloaded "episodes" from YouTube
 type YTSubscriptionEntry struct {
 	Subscription int64  `db:"subscription"`
 	URL          string `db:"url"`
 	Title        string `db:"title"`
 	Date         string `db:"date"`
 }
-
-//	"github.com/otium/ytdl"
 
 func main() {
 
@@ -66,21 +66,6 @@ func main() {
 		checkErr(err)
 		fmt.Println(subscription)
 		fmt.Println(ytSubscriptionEntries)
-
-		//vidname := sanitize.Path(vid.Title) + ".mp4"
-
-		//var out bytes.Buffer
-		//var stderr bytes.Buffer
-		//cmd.Stdout = &out
-		//cmd.Stderr = &stderr
-
-		//err := cmd.Run()
-		//if err != nil {
-		//	fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
-		//	return
-		//}
-		//fmt.Println("Result: " + out.String())
-		//os.Exit(1)
 
 		var feedURL string
 		split := strings.Split(subscription.SubURL, "/")
@@ -120,6 +105,7 @@ func main() {
 
 }
 
+// RSSEntryInDB checks if we have already downloaded this "episode"
 func RSSEntryInDB(link string, dbentries []YTSubscriptionEntry) bool {
 	for _, b := range dbentries {
 		if b.URL == link {
