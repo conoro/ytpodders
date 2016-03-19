@@ -1,12 +1,17 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/SlyMarbo/rss"
+	"github.com/gorilla/feeds"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -30,6 +35,9 @@ FOREIGN KEY(subscription) REFERENCES subscriptions(ID)
 
 // INSERT INTO subscriptions(suburl) VALUES ("https://www.youtube.com/user/durianriders");
 // INSERT INTO subscriptions(suburl) VALUES ("https://www.youtube.com/channel/UCYdkEm-NjhS8TmLVt_qZy9g");
+// INSERT INTO subscriptions(suburl) VALUES ("https://www.youtube.com/user/sciguy14");
+// INSERT INTO subscriptions(suburl) VALUES ("https://www.youtube.com/channel/UCh8rjWtGCIAbwPrZb3Te8bQ");
+// INSERT INTO subscriptions(suburl) VALUES ("https://www.youtube.com/channel/UCSUi7O_Fg6SgwkF2W2Au2Zw");
 
 // YTSubscription is just the URL of each YouTuber you are subscribed to
 type YTSubscription struct {
@@ -45,29 +53,53 @@ type YTSubscriptionEntry struct {
 	Date         string `db:"date"`
 }
 
+// YTdl has info about the YouTube file itself from youtube-dl
+type YTdl struct {
+	Uploader string `json:"uploader"`
+	Title    string `json:"title"`
+}
+
 func main() {
+	var youtubeInfo YTdl
+	var dropboxFolder string
+	dropboxFolder, err = getDropboxFolder()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
+	}
 
 	vidcmd := "youtube-dl"
 	//vidcmd := "echo"
 
 	db, err := sqlx.Connect("sqlite3", "youtube2podcast.db")
-	checkErr(err)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
+	}
 
 	// query
 	ytSubscriptions := []YTSubscription{}
 	err = db.Select(&ytSubscriptions, "SELECT ID, suburl FROM subscriptions")
-	checkErr(err)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
+	}
+
 	//fmt.Println(ytSubscriptions)
 
 	for _, subscription := range ytSubscriptions {
 
 		ytSubscriptionEntries := []YTSubscriptionEntry{}
 		err = db.Select(&ytSubscriptionEntries, "SELECT subscription, url, title, date FROM subscription_entries WHERE subscription=$1", subscription.SubID)
-		checkErr(err)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			os.Exit(1)
+		}
 		fmt.Println(subscription)
 		fmt.Println(ytSubscriptionEntries)
 
 		var feedURL string
+
 		split := strings.Split(subscription.SubURL, "/")
 		feedid := split[len(split)-1]
 		fmt.Println(feedid)
@@ -79,7 +111,8 @@ func main() {
 		}
 		feed, error := rss.Fetch(feedURL)
 		if error != nil {
-			panic(error)
+			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			os.Exit(1)
 		}
 		fmt.Println(feed)
 
@@ -91,17 +124,79 @@ func main() {
 				tx.MustExec("INSERT INTO subscription_entries(subscription,url,title,date) VALUES($1,$2,$3,$4)", subscription.SubID, item.Link, item.Title, item.Date)
 				tx.Commit()
 
-				args1 := []string{"--extract-audio", "--audio-format", "mp3", "-o", "./podcasts/%(uploader)s/%(title)s.%(ext)s", item.Link}
+				//TODO: Need to figure out what filename youtube-dl is generating here
+				args1 := []string{"-v", "--extract-audio", "--audio-format", "mp3", "-o", "./podcasts/%(uploader)s/%(title)s.%(ext)s", item.Link}
 				cmd := exec.Command(vidcmd, args1...)
-				err5 := cmd.Run()
-				if err5 != nil {
-					fmt.Println(err5)
+
+				var out bytes.Buffer
+				cmd.Stdout = &out
+				err = cmd.Run()
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "error: %v\n", err)
 					os.Exit(1)
 				}
+
+				//err = json.Unmarshal([]byte(out.String()), &youtubeInfo)
+				//if err != nil {
+				//	fmt.Fprintf(os.Stderr, "error: %v\n", err)
+				//	os.Exit(1)
+				//}
+
+				scanner := bufio.NewScanner(&out)
+
+				for scanner.Scan() {
+					if strings.Contains(scanner.Text(), "[ffmpeg] Destination:") {
+						fmt.Println(scanner.Text())
+					}
+				}
+
+				mp3FileLocalStyle := "\\podcasts\\" + youtubeInfo.Uploader + "\\" + youtubeInfo.Title + ".mp3"
+				mp3FileRemoteStyle := "/podcasts/" + youtubeInfo.Uploader + "/" + youtubeInfo.Title + ".mp3"
+				fmt.Println(mp3FileLocalStyle)
+				fmt.Println(mp3FileRemoteStyle)
+
+				getFileSize(mp3FileLocalStyle)
+
+				if dropboxFolder != "remote" {
+					err = copyLocallyToDropbox(mp3FileLocalStyle, dropboxFolder+"\\Apps\\YouTube2Podcast\\podcasts\\"+youtubeInfo.Uploader+"\\")
+					if err != nil {
+						fmt.Fprintf(os.Stderr, "error: %v\n", err)
+						os.Exit(1)
+					}
+				} else {
+					err = copyRemotelyToDropbox("."+mp3FileRemoteStyle, mp3FileRemoteStyle)
+					if err != nil {
+						fmt.Fprintf(os.Stderr, "error: %v\n", err)
+						os.Exit(1)
+					}
+				}
+				var dropboxURL string
+				dropboxURL, err = getDropboxURL(mp3FileRemoteStyle)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "error: %v\n", err)
+					os.Exit(1)
+				}
+				fmt.Println(dropboxURL)
+
 			}
 		}
 
 	}
+
+	// TODO: Need to create and update rss.xml
+	RSSFile, err := generateRSS(dropboxFolder + "\\Apps\\YouTube2Podcast\\")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Println(RSSFile)
+
+	RSSFileURL, err := getDropboxURL("rss.xml")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Println(RSSFileURL)
 
 }
 
@@ -115,36 +210,47 @@ func RSSEntryInDB(link string, dbentries []YTSubscriptionEntry) bool {
 	return false
 }
 
-func checkErr(err error) {
-	if err != nil {
-		panic(err)
+func generateRSS(dropboxFolder string) (string, error) {
+	now := time.Now()
+	feed := &feeds.Feed{
+		Title:       "Conor's YouTube Podcasts",
+		Link:        &feeds.Link{Href: "http://conoroneill.net"},
+		Description: "YouTube Videos converted to Podcasts",
+		Author:      &feeds.Author{Name: "Conor O'Neill", Email: "conor@conoroneill.com"},
+		Created:     now,
 	}
+
+	feed.Items = []*feeds.Item{
+		{
+			Title:       "GINGER RUNNER LIVE 107b The Joe Grant Episode",
+			Link:        &feeds.Link{Href: "https://www.dropbox.com/s/d5vei33k0xcdndm/GINGER%20RUNNER%20LIVE%20%23107%20_%20The%20Joe%20Grant%20Episode-pYHbkSNAR7I.mp3?raw=1", Length: "83503158", Type: "audio/mpeg"},
+			Description: "GINGER RUNNER LIVE 107b The Joe Grant Episode",
+			Author:      &feeds.Author{Name: "Ginger Runner", Email: "conor@conoroneill.com"},
+			Created:     now,
+		},
+	}
+
+	rss, err := feed.ToRss()
+	if err != nil {
+		return "", err
+	}
+
+	rssOut := []byte(rss)
+
+	// TODO: Need to add remote upload of this file when not running on local PC
+	rssFile := dropboxFolder + "rss.xml"
+	err = ioutil.WriteFile(rssFile, rssOut, 0644)
+	if err != nil {
+		return "", err
+	}
+	return rssFile, nil
 }
 
-// Subscriptions
-// YouTube Channel ID or User ID
-// Create RSS URL from https://www.youtube.com/feeds/videos.xml?user=specificuserid or https://www.youtube.com/feeds/videos.xml?channel_id=specificchannelid
-
-// vid, err := ytdl.GetVideoInfo("https://www.youtube.com/watch?v=1rZ-JorHJEY")
-// The video ID
-// ID  string `json:"id"`
-// Title string `json:"title"`
-// Description string `json:"description"`
-// DatePublished time.Time `json:"datePublished"`
-// Author string `json:"author"`
-
-// Subscription Entries
-// Subscription ID
-// Entry URL
-// Entry URL date
-// Entry URL title
-// Entry URl GUID?
-
-// Podcast Items
-// Title
-// GUID = Original YouTube Link
-// MP3 URL on Server (or S3)
-// Description
-// Enclosure Same as GUID
-// Category Maybe
-// pubDate
+func getFileSize(srcFile string) (int64, error) {
+	fi, err := os.Stat(srcFile)
+	if err != nil {
+		return 0, err
+	}
+	fmt.Printf("The file is %d bytes long", fi.Size())
+	return fi.Size(), nil
+}
