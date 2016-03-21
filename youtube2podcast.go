@@ -54,13 +54,13 @@ type YTSubscriptionEntry struct {
 }
 
 // YTdl has info about the YouTube file itself from youtube-dl
-type YTdl struct {
-	Uploader string `json:"uploader"`
-	Title    string `json:"title"`
-}
+//type YTdl struct {
+//	Uploader string `json:"uploader"`
+//	Title    string `json:"title"`
+//}
 
 func main() {
-	var youtubeInfo YTdl
+	//	var youtubeInfo YTdl
 	var dropboxFolder string
 	dropboxFolder, err = getDropboxFolder()
 	if err != nil {
@@ -142,25 +142,27 @@ func main() {
 				//	os.Exit(1)
 				//}
 
+				var ytdlPath string
 				scanner := bufio.NewScanner(&out)
-
 				for scanner.Scan() {
 					if strings.Contains(scanner.Text(), "[ffmpeg] Destination:") {
-						fmt.Println(scanner.Text())
+						ytdlPath = strings.Split(scanner.Text(), ": ")[1]
+						// podcasts\Anthony Ngu\Universal Smart Home Remote  - Prototype Demo.mp3
 					}
 				}
 
-				mp3FileLocalStyle := "\\podcasts\\" + youtubeInfo.Uploader + "\\" + youtubeInfo.Title + ".mp3"
-				mp3FileRemoteStyle := "/podcasts/" + youtubeInfo.Uploader + "/" + youtubeInfo.Title + ".mp3"
+				mp3FileLocalStyle := ytdlPath
+				mp3FileRemoteStyle := "/" + strings.Replace(ytdlPath, "\\", "/", -1)
+				//youtubeUploader := strings.Split(ytdlPath, "\\")[1]
 				fmt.Println(mp3FileLocalStyle)
 				fmt.Println(mp3FileRemoteStyle)
 
 				getFileSize(mp3FileLocalStyle)
 
 				if dropboxFolder != "remote" {
-					err = copyLocallyToDropbox(mp3FileLocalStyle, dropboxFolder+"\\Apps\\YouTube2Podcast\\podcasts\\"+youtubeInfo.Uploader+"\\")
+					err = copyLocallyToDropbox(mp3FileLocalStyle, dropboxFolder+"\\Apps\\YouTube2Podcast\\")
 					if err != nil {
-						fmt.Fprintf(os.Stderr, "error: %v\n", err)
+						fmt.Fprintf(os.Stderr, "Copy to Local Dropbox Error: %v\n", err)
 						os.Exit(1)
 					}
 				} else {
@@ -171,7 +173,7 @@ func main() {
 					}
 				}
 				var dropboxURL string
-				dropboxURL, err = getDropboxURL(mp3FileRemoteStyle)
+				dropboxURL, err = getDropboxURLWhenSyncComplete(mp3FileRemoteStyle)
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "error: %v\n", err)
 					os.Exit(1)
