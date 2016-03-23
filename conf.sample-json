@@ -1,5 +1,0 @@
-{
-    "clientid": "from https://www.dropbox.com/developers/apps/create > Dropbox API > App Folder",
-    "clientsecret": "from https://www.dropbox.com/developers/apps/create > Dropbox API > App Folder",
-    "token": "from the first time you run the code"
-}
