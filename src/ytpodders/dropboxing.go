@@ -43,7 +43,8 @@ func getDropboxFolder() (string, error) {
 
 	clientid = config.ClientID
 	clientsecret = config.ClientSecret
-	token = config.Token
+
+	//token = config.Token
 
 	// TODO: Check if Token defined in conf.json. If no, do longer OAuth flow and then save token to conf.json
 
@@ -54,25 +55,25 @@ func getDropboxFolder() (string, error) {
 	db.SetAppInfo(clientid, clientsecret)
 
 	// This method will ask the user to visit an URL and paste the generated code.
-	//if err = db.Auth(); err != nil {
-	//	fmt.Println(err)
-	//	return
-	//}
+	if err = db.Auth(); err != nil {
+		fmt.Println(err)
+		return "", err
+	}
 	// You can now retrieve the token if you want.
-	//token = db.AccessToken()
-	//fmt.Println(token)
+	token = db.AccessToken()
+	fmt.Println(token)
 
 	// 3. Provide the user token.
 	db.SetAccessToken(token)
 
 	// 4. Send your commands.
 	// In this example, you will create a new folder named "demo".
-	//folder := "podcasts"
-	//if _, err = db.CreateFolder(folder); err != nil {
-	//	fmt.Printf("Error creating folder %s: %s\n", folder, err)
-	//} else {
-	//	fmt.Printf("Folder %s successfully created\n", folder)
-	//}
+	folder := "podcasts"
+	if _, err = db.CreateFolder(folder); err != nil {
+		fmt.Printf("Error creating folder %s: %s\n", folder, err)
+	} else {
+		fmt.Printf("Folder %s successfully created\n", folder)
+	}
 
 	// Only use this if running on a Server, not your local PC. Because it uploads to Cloud and then Dropbox syncs back down. So double the bandwidth
 	// Do this by checking for the existence of (on Windows only obvs) %APPDATA%\Dropbox\host.db
@@ -127,12 +128,12 @@ func copyLocallyToDropbox(srcFile string, destFolder string) error {
 	}
 
 	defer s.Close()
-	destFileSplit := strings.Split(destFolder+srcFile, "\\")
-	destFile := destFileSplit[len(destFileSplit)-1]
-	err = os.MkdirAll(destFile, 0777)
-	if err != nil {
-		return err
-	}
+	//destFileSplit := strings.Split(destFolder+srcFile, "\\")
+	//destFile := destFileSplit[len(destFileSplit)-1]
+	//err = os.MkdirAll(destFile, 0777)
+	//if err != nil {
+	//	return err
+	//}
 
 	d, err := os.Create(destFolder + srcFile)
 	if err != nil {

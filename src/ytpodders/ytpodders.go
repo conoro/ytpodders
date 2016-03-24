@@ -28,6 +28,8 @@ subscription INTEGER,
 url TEXT,
 title TEXT,
 date TEXT,
+dropboxurl TEXT,
+filesize INTEGER,
 FOREIGN KEY(subscription) REFERENCES subscriptions(ID)
 );
 
@@ -51,17 +53,22 @@ type YTSubscriptionEntry struct {
 	URL          string `db:"url"`
 	Title        string `db:"title"`
 	Date         string `db:"date"`
+	DropboxURL   string `db:"dropboxurl"`
+	FileSize     int64  `db:"filesize"`
 }
 
-// YTdl has info about the YouTube file itself from youtube-dl
-//type YTdl struct {
-//	Uploader string `json:"uploader"`
-//	Title    string `json:"title"`
-//}
+var RSSXML = &feeds.Feed{
+	Title:       "My YouTube Podcasts from YTPodders",
+	Link:        &feeds.Link{Href: "http://ytpodders.com"},
+	Description: "YouTube Videos converted to Podcasts by YTPodders",
+	Author:      &feeds.Author{Name: "YouTuber", Email: "youtuber@example.com"},
+}
 
 func main() {
 	//	var youtubeInfo YTdl
 	var dropboxFolder string
+	var fileSize int64
+
 	dropboxFolder, err = getDropboxFolder()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
@@ -119,12 +126,8 @@ func main() {
 		for _, item := range feed.Items {
 			fmt.Println(item.Title)
 			if RSSEntryInDB(item.Link, ytSubscriptionEntries) == false {
-				fmt.Println("Adding new RSS Entry")
-				tx := db.MustBegin()
-				tx.MustExec("INSERT INTO subscription_entries(subscription,url,title,date) VALUES($1,$2,$3,$4)", subscription.SubID, item.Link, item.Title, item.Date)
-				tx.Commit()
 
-				//TODO: Need to figure out what filename youtube-dl is generating here
+				//TODO: Need to figure out what filename youtube-dl is generating here (including sanitization of characters for the filesystem)
 				args1 := []string{"-v", "--extract-audio", "--audio-format", "mp3", "-o", "./podcasts/%(uploader)s/%(title)s.%(ext)s", item.Link}
 				cmd := exec.Command(vidcmd, args1...)
 
@@ -135,12 +138,6 @@ func main() {
 					fmt.Fprintf(os.Stderr, "error: %v\n", err)
 					os.Exit(1)
 				}
-
-				//err = json.Unmarshal([]byte(out.String()), &youtubeInfo)
-				//if err != nil {
-				//	fmt.Fprintf(os.Stderr, "error: %v\n", err)
-				//	os.Exit(1)
-				//}
 
 				var ytdlPath string
 				scanner := bufio.NewScanner(&out)
@@ -157,10 +154,10 @@ func main() {
 				fmt.Println(mp3FileLocalStyle)
 				fmt.Println(mp3FileRemoteStyle)
 
-				getFileSize(mp3FileLocalStyle)
+				fileSize, _ = getFileSize(mp3FileLocalStyle)
 
 				if dropboxFolder != "remote" {
-					err = copyLocallyToDropbox(mp3FileLocalStyle, dropboxFolder+"\\Apps\\YouTube2Podcast\\")
+					err = copyLocallyToDropbox(mp3FileLocalStyle, dropboxFolder+"\\Apps\\YTPodders\\")
 					if err != nil {
 						fmt.Fprintf(os.Stderr, "Copy to Local Dropbox Error: %v\n", err)
 						os.Exit(1)
@@ -179,21 +176,35 @@ func main() {
 					os.Exit(1)
 				}
 				fmt.Println(dropboxURL)
+				fmt.Println("Adding new RSS Entry")
+				tx := db.MustBegin()
+				tx.MustExec("INSERT INTO subscription_entries(subscription,url,title,date, dropboxurl, filesize) VALUES($1,$2,$3,$4,$5,$6)", subscription.SubID, item.Link, item.Title, item.Date, dropboxURL, fileSize)
+				tx.Commit()
 
 			}
 		}
 
+		// Add all entries to RSSXML struct which will be used to generate the rss.xml file
+		ytAllSubscriptionEntries := []YTSubscriptionEntry{}
+		err = db.Select(&ytAllSubscriptionEntries, "SELECT subscription, url, title, date, dropboxurl, filesize FROM subscription_entries")
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			os.Exit(1)
+		}
+		for _, ytItem := range ytAllSubscriptionEntries {
+			addEntrytoRSSXML(ytItem)
+		}
 	}
 
 	// TODO: Need to create and update rss.xml
-	RSSFile, err := generateRSS(dropboxFolder + "\\Apps\\YouTube2Podcast\\")
+	RSSFile, err := generateRSS(dropboxFolder + "\\Apps\\YTPodders\\")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
 	fmt.Println(RSSFile)
 
-	RSSFileURL, err := getDropboxURL("rss.xml")
+	RSSFileURL, err := getDropboxURLWhenSyncComplete("rss.xml")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
@@ -212,27 +223,35 @@ func RSSEntryInDB(link string, dbentries []YTSubscriptionEntry) bool {
 	return false
 }
 
+func addEntrytoRSSXML(ytItem YTSubscriptionEntry) error {
+
+	//layOut := "Tue Mar 22 20:11:27 +0000 UTC 2016"
+	layOut := "2006-01-02 15:04:05-07:00"
+	timeStamp, err := time.Parse(layOut, ytItem.Date)
+
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	Item := feeds.Item{
+		Title:       ytItem.Title,
+		Link:        &feeds.Link{Href: ytItem.DropboxURL, Length: string(ytItem.FileSize), Type: "audio/mpeg"},
+		Description: ytItem.Title,
+		Author:      &feeds.Author{Name: "YTPodder", Email: "youtuber@example.com"},
+		Created:     timeStamp,
+	}
+
+	RSSXML.Add(&Item)
+	return nil
+
+}
+
 func generateRSS(dropboxFolder string) (string, error) {
 	now := time.Now()
-	feed := &feeds.Feed{
-		Title:       "My YouTube Podcasts",
-		Link:        &feeds.Link{Href: "http://conoroneill.net"},
-		Description: "YouTube Videos converted to Podcasts",
-		Author:      &feeds.Author{Name: "YouTuber", Email: "youtuber@example.com"},
-		Created:     now,
-	}
+	RSSXML.Created = now
 
-	feed.Items = []*feeds.Item{
-		{
-			Title:       "GINGER RUNNER LIVE 107b The Joe Grant Episode",
-			Link:        &feeds.Link{Href: "https://www.dropbox.com/s/d5vei33k0xcdndm/GINGER%20RUNNER%20LIVE%20%23107%20_%20The%20Joe%20Grant%20Episode-pYHbkSNAR7I.mp3?raw=1", Length: "83503158", Type: "audio/mpeg"},
-			Description: "GINGER RUNNER LIVE 107b The Joe Grant Episode",
-			Author:      &feeds.Author{Name: "YouTuber", Email: "youtuber@example.com"},
-			Created:     now,
-		},
-	}
-
-	rss, err := feed.ToRss()
+	rss, err := RSSXML.ToRss()
 	if err != nil {
 		return "", err
 	}
