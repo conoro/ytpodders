@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 
@@ -58,10 +59,10 @@ type YTSubscriptionEntry struct {
 }
 
 var RSSXML = &feeds.Feed{
-	Title:       "My YouTube Podcasts from YTPodders",
-	Link:        &feeds.Link{Href: "http://ytpodders.com"},
+	Title:       "YTPodders YouTube Podcasts",
+	Link:        &feeds.Link{Href: "https://ytpodders.com"},
 	Description: "YouTube Videos converted to Podcasts by YTPodders",
-	Author:      &feeds.Author{Name: "YouTuber", Email: "youtuber@example.com"},
+	Author:      &feeds.Author{Name: "YTPodder", Email: "youtuber@example.com"},
 }
 
 func main() {
@@ -121,7 +122,7 @@ func main() {
 			fmt.Fprintf(os.Stderr, "error: %v\n", err)
 			os.Exit(1)
 		}
-		fmt.Println(feed)
+		// fmt.Println(feed)
 
 		for _, item := range feed.Items {
 			fmt.Println(item.Title)
@@ -196,7 +197,7 @@ func main() {
 		}
 	}
 
-	// TODO: Need to create and update rss.xml
+	// Create and update rss.xml
 	RSSFile, err := generateRSS(dropboxFolder + "\\Apps\\YTPodders\\")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
@@ -204,6 +205,7 @@ func main() {
 	}
 	fmt.Println(RSSFile)
 
+	// When Dropbox has synced, return the URL of rss.xml to the User
 	RSSFileURL, err := getDropboxURLWhenSyncComplete("rss.xml")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
@@ -236,7 +238,7 @@ func addEntrytoRSSXML(ytItem YTSubscriptionEntry) error {
 
 	Item := feeds.Item{
 		Title:       ytItem.Title,
-		Link:        &feeds.Link{Href: ytItem.DropboxURL, Length: string(ytItem.FileSize), Type: "audio/mpeg"},
+		Link:        &feeds.Link{Href: ytItem.DropboxURL, Length: strconv.FormatInt(ytItem.FileSize, 10), Type: "audio/mpeg"},
 		Description: ytItem.Title,
 		Author:      &feeds.Author{Name: "YTPodder", Email: "youtuber@example.com"},
 		Created:     timeStamp,

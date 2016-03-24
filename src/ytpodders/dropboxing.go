@@ -44,9 +44,7 @@ func getDropboxFolder() (string, error) {
 	clientid = config.ClientID
 	clientsecret = config.ClientSecret
 
-	//token = config.Token
-
-	// TODO: Check if Token defined in conf.json. If no, do longer OAuth flow and then save token to conf.json
+	token = config.Token
 
 	// 1. Create a new dropbox object.
 	db = dropbox.NewDropbox()
@@ -54,27 +52,33 @@ func getDropboxFolder() (string, error) {
 	// 2. Provide your clientid and clientsecret (see prerequisite).
 	db.SetAppInfo(clientid, clientsecret)
 
-	// This method will ask the user to visit an URL and paste the generated code.
-	if err = db.Auth(); err != nil {
-		fmt.Println(err)
-		return "", err
-	}
-	// You can now retrieve the token if you want.
-	token = db.AccessToken()
-	fmt.Println(token)
+	// If token isn't set in conf.json, go through Dropbox Auth flow to get one
+	if token == "" {
 
-	// 3. Provide the user token.
-	db.SetAccessToken(token)
+		// This method will ask the user to visit an URL and paste the generated code.
+		if err = db.Auth(); err != nil {
+			fmt.Println(err)
+			return "", err
+		}
+		// You can now retrieve the token if you want.
+		token = db.AccessToken()
 
-	// 4. Send your commands.
-	// In this example, you will create a new folder named "demo".
-	folder := "podcasts"
-	if _, err = db.CreateFolder(folder); err != nil {
-		fmt.Printf("Error creating folder %s: %s\n", folder, err)
+		// 3. Provide the user token.
+		db.SetAccessToken(token)
+
+		// 4. Send your commands.
+		// In this example, you will create a new folder named "demo".
+		folder := "podcasts"
+		if _, err = db.CreateFolder(folder); err != nil {
+			fmt.Printf("Error creating folder %s: %s\n", folder, err)
+		} else {
+			fmt.Printf("Folder %s successfully created\n", folder)
+		}
+		fmt.Println("Please set the token parameter in conf.json to: ", token)
 	} else {
-		fmt.Printf("Folder %s successfully created\n", folder)
+		// 3. Provide the user token.
+		db.SetAccessToken(token)
 	}
-
 	// Only use this if running on a Server, not your local PC. Because it uploads to Cloud and then Dropbox syncs back down. So double the bandwidth
 	// Do this by checking for the existence of (on Windows only obvs) %APPDATA%\Dropbox\host.db
 	// If it exists then read it and base64 decode the second line of its contents to get the root path of the Dropbox files for this user
