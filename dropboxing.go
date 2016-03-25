@@ -67,7 +67,6 @@ func getDropboxFolder() (string, error) {
 		db.SetAccessToken(token)
 
 		// 4. Send your commands.
-		// In this example, you will create a new folder named "demo".
 		folder := "podcasts"
 		if _, err = db.CreateFolder(folder); err != nil {
 			fmt.Printf("Error creating folder %s: %s\n", folder, err)
@@ -115,15 +114,6 @@ func getDropboxFolder() (string, error) {
 
 }
 
-// TODO: Add logging everywhere
-// TODO: Move all of the code below to working with a list of files
-// TODO: Should probably run the code inside a Dropbox folder when running locally to avoid the file copying (or have CMD file in Dropbox Dir)
-// TODO: Need to figure out Hierarchy (possibly just one directory per Sub)
-// TODO: Need to figure out clean naming for Windows filesystem e.g. remove underscores, hashes, colons, slashes etc (or escape them)
-// TODO: Figure out Windows Scheduler again
-
-// TODO: Need to add the filelength to the RSS file
-
 func copyLocallyToDropbox(srcFile string, destFolder string) error {
 
 	s, err := os.Open(srcFile)
@@ -132,12 +122,6 @@ func copyLocallyToDropbox(srcFile string, destFolder string) error {
 	}
 
 	defer s.Close()
-	//destFileSplit := strings.Split(destFolder+srcFile, "\\")
-	//destFile := destFileSplit[len(destFileSplit)-1]
-	//err = os.MkdirAll(destFile, 0777)
-	//if err != nil {
-	//	return err
-	//}
 
 	d, err := os.Create(destFolder + srcFile)
 	if err != nil {

@@ -71,6 +71,7 @@ func main() {
 	var fileSize int64
 
 	// TODO: Add proper Go-style logging everywhere instead of all of these Print statements
+	// TODO: Figure out Windows Scheduler again
 	// TODO: Add proper Set max retention time as parameter in conf.json
 
 	// TODO: Offer a range of commands as follows:
@@ -111,8 +112,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	//fmt.Println(ytSubscriptions)
-
 	for _, subscription := range ytSubscriptions {
 
 		ytSubscriptionEntries := []YTSubscriptionEntry{}
@@ -140,13 +139,11 @@ func main() {
 			fmt.Fprintf(os.Stderr, "error: %v\n", err)
 			os.Exit(1)
 		}
-		// fmt.Println(feed)
 
 		for _, item := range feed.Items {
 			fmt.Println(item.Title)
 			if RSSEntryInDB(item.Link, ytSubscriptionEntries) == false {
 
-				//TODO: Need to figure out what filename youtube-dl is generating here (including sanitization of characters for the filesystem)
 				args1 := []string{"-v", "--extract-audio", "--audio-format", "mp3", "-o", "./podcasts/%(uploader)s/%(title)s.%(ext)s", item.Link}
 				cmd := exec.Command(vidcmd, args1...)
 
@@ -163,13 +160,11 @@ func main() {
 				for scanner.Scan() {
 					if strings.Contains(scanner.Text(), "[ffmpeg] Destination:") {
 						ytdlPath = strings.Split(scanner.Text(), ": ")[1]
-						// podcasts\Anthony Ngu\Universal Smart Home Remote  - Prototype Demo.mp3
 					}
 				}
 
 				mp3FileLocalStyle := ytdlPath
 				mp3FileRemoteStyle := "/" + strings.Replace(ytdlPath, "\\", "/", -1)
-				//youtubeUploader := strings.Split(ytdlPath, "\\")[1]
 				fmt.Println(mp3FileLocalStyle)
 				fmt.Println(mp3FileRemoteStyle)
 
@@ -245,7 +240,6 @@ func RSSEntryInDB(link string, dbentries []YTSubscriptionEntry) bool {
 
 func addEntrytoRSSXML(ytItem YTSubscriptionEntry) error {
 
-	//layOut := "Tue Mar 22 20:11:27 +0000 UTC 2016"
 	layOut := "2006-01-02 15:04:05-07:00"
 	timeStamp, err := time.Parse(layOut, ytItem.Date)
 
