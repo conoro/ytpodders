@@ -9,10 +9,10 @@ It uses [youtube-dl]() and [ffmpeg]() to do all of the heavy lifting and stores 
 All the generated MP3s are stored in your Dropbox Folder and an rss.xml file is generated which can be used by your phone's Podcasting App to subscribe.
 
 You can use the following commands:
+- [x] no command - updates everything as you'd expect. Normal one-off execution
 - [x] help - print help out and exit
+
 TODO
-- [x] help - print help out and exit
-- [ ] run - updates everything as you'd expect. Normal one-off execution
 - [ ] add - add a subscription. Pass it the URL of a YouTube Channel or User (possibly sanitize)
 - [ ] list - list all subscriptions as ID, URL, (Title maybe? or Uploader maybe?)
 - [ ] remove - remove a subscription by ID
