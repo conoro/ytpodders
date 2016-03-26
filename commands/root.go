@@ -1,9 +1,10 @@
-package main
+package commands
 
 import (
+	"fmt"
+
 	"bufio"
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -11,11 +12,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/conoro/ytpodders/utils"
+
 	"github.com/SlyMarbo/rss"
-	"github.com/conoro/ytpodders/commands"
 	"github.com/gorilla/feeds"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/spf13/cobra"
 )
 
 /*
@@ -66,9 +69,24 @@ var RSSXML = &feeds.Feed{
 	Author:      &feeds.Author{Name: "YTPodder", Email: "youtuber@example.com"},
 }
 
-func main() {
+// RootCmd is the Action to run if no command specified. In our case this is a full update of all the feeds and podcasts
+var RootCmd = &cobra.Command{
+	Use:   "ytpodders",
+	Short: "YTPodders creates subscribable MP3 podcasts from YouTube Users and Channels using Dropbox",
+	Long: `Each time you run YTPodders, it checks the list of YouTube Users and Channels that you have added here for new uploads. It grabs those using youtube-dl and converts them
+            to MP3s. It then copiesor uploads the MP3s to your Dropbox account. Finally
+						it updates rss.xml and provides you with its URL. You can add this URL to your
+						poscast app on your phone e.g. BeyondPod on Android and then automatically get
+						the audio of those YouTubers on your phone when your podcast app updates.
+            `,
+	Run: RootRun,
+}
+
+// RootRun is executed when user passes no arguments to ytpodders
+func RootRun(cmd *cobra.Command, args []string) {
 	var dropboxFolder string
 	var fileSize int64
+	var err error
 
 	// TODO: Add proper Go-style logging everywhere instead of all of these Print statements
 	// TODO: Figure out Windows Scheduler again
@@ -79,9 +97,9 @@ func main() {
 	// TODO: help - print help out and exit
 	// TODO: run - updates everything as you'd expect. Normal one-off execution
 	// TODO: add - add a subscription. Pass it the URL of a YouTube Channel or User (possibly sanitize)
-	commands.AddFeed("test URL")
 
 	// TODO: list - list all subscriptions as ID, URL, (Title maybe? or Uploader maybe?)
+
 	// TODO: remove - remove a subscription by ID
 	// TODO: scheduler - runs it as some sort of background daemon. No idea how to to this on Windows
 	// TODO: dryrun - same as run except nothing is downloaded and the database is not modified but it lists what it would do
@@ -89,7 +107,7 @@ func main() {
 	// TODO: reauth - re-run the Auth flow to get a new Dropbox token
 	// TODO: reinit - Clear the DB completely and delete both local and Dropbox MP3s
 
-	dropboxFolder, err = getDropboxFolder()
+	dropboxFolder, err = utils.GetDropboxFolder()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
@@ -171,20 +189,20 @@ func main() {
 				fileSize, _ = getFileSize(mp3FileLocalStyle)
 
 				if dropboxFolder != "remote" {
-					err = copyLocallyToDropbox(mp3FileLocalStyle, dropboxFolder+"\\Apps\\YTPodders\\")
+					err = utils.CopyLocallyToDropbox(mp3FileLocalStyle, dropboxFolder+"\\Apps\\YTPodders\\")
 					if err != nil {
 						fmt.Fprintf(os.Stderr, "Copy to Local Dropbox Error: %v\n", err)
 						os.Exit(1)
 					}
 				} else {
-					err = copyRemotelyToDropbox("."+mp3FileRemoteStyle, mp3FileRemoteStyle)
+					err = utils.CopyRemotelyToDropbox("."+mp3FileRemoteStyle, mp3FileRemoteStyle)
 					if err != nil {
 						fmt.Fprintf(os.Stderr, "error: %v\n", err)
 						os.Exit(1)
 					}
 				}
 				var dropboxURL string
-				dropboxURL, err = getDropboxURLWhenSyncComplete(mp3FileRemoteStyle)
+				dropboxURL, err = utils.GetDropboxURLWhenSyncComplete(mp3FileRemoteStyle)
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "error: %v\n", err)
 					os.Exit(1)
@@ -219,7 +237,7 @@ func main() {
 	fmt.Println(RSSFile)
 
 	// When Dropbox has synced, return the URL of rss.xml to the User
-	RSSFileURL, err := getDropboxURLWhenSyncComplete("rss.xml")
+	RSSFileURL, err := utils.GetDropboxURLWhenSyncComplete("rss.xml")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
@@ -288,4 +306,5 @@ func getFileSize(srcFile string) (int64, error) {
 	}
 	fmt.Printf("The file is %d bytes long", fi.Size())
 	return fi.Size(), nil
+
 }

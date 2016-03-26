@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"bufio"
@@ -27,7 +27,7 @@ var db *dropbox.Dropbox
 var dropboxLink *dropbox.Link
 var err error
 
-func getDropboxFolder() (string, error) {
+func GetDropboxFolder() (string, error) {
 
 	var clientid, clientsecret, token string
 	var dropboxFolder string
@@ -114,7 +114,7 @@ func getDropboxFolder() (string, error) {
 
 }
 
-func copyLocallyToDropbox(srcFile string, destFolder string) error {
+func CopyLocallyToDropbox(srcFile string, destFolder string) error {
 
 	s, err := os.Open(srcFile)
 	if err != nil {
@@ -136,7 +136,7 @@ func copyLocallyToDropbox(srcFile string, destFolder string) error {
 	return nil
 }
 
-func copyRemotelyToDropbox(srcFile string, destPath string) error {
+func CopyRemotelyToDropbox(srcFile string, destPath string) error {
 	var rev string
 
 	fmt.Printf("It's remote baby!\n")
@@ -151,7 +151,7 @@ func copyRemotelyToDropbox(srcFile string, destPath string) error {
 
 // getDropboxURLwhenSyncComplete will keep trying to getDropboxURL() until either
 // we get a result from getDropboxURL() or the timeout expires
-func getDropboxURLWhenSyncComplete(destFile string) (string, error) {
+func GetDropboxURLWhenSyncComplete(destFile string) (string, error) {
 
 	// 2 minutes seems a reasonable timeout for an MP3 to upload from Local to Remote
 	timeout := time.After(2 * time.Minute)
@@ -164,7 +164,7 @@ func getDropboxURLWhenSyncComplete(destFile string) (string, error) {
 			return "", errors.New("timed out")
 		// Got a tick, we should check on getDropboxURL()
 		case <-tick:
-			dropboxURL, err := getDropboxURL(destFile)
+			dropboxURL, err := GetDropboxURL(destFile)
 			// Error from getDropboxURL(), we should bail
 			if err == nil {
 				return dropboxURL, err
@@ -175,7 +175,7 @@ func getDropboxURLWhenSyncComplete(destFile string) (string, error) {
 	}
 }
 
-func getDropboxURL(destFile string) (string, error) {
+func GetDropboxURL(destFile string) (string, error) {
 	// Need to get Download URL of the Dropbox file so I can add to rss.xml
 	if dropboxLink, err = db.Shares(destFile, false); err != nil {
 		fmt.Printf("%s: %s\n", destFile, err)
