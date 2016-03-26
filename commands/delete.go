@@ -8,22 +8,26 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// ListCmd is the Action to run to add a YouTube Feed to your ytpodders subscriptions
-var ListCmd = &cobra.Command{
-	Use:   "list",
-	Short: "list all your ytpodder subscriptions",
-	Long: `Get the name, URL and status of each of your subscriptions.
-        `,
-	Run: ListRun,
+// AddCmd is the Action to run to add a YouTube Feed to your list
+var SubDeleteCmd = &cobra.Command{
+	Use:   "delete ID_of_subscription",
+	Short: "delete a ytpodders subscription",
+	Long: ` use ytpodders list to get all the ids and ytpodders delete to delete one
+`,
+	Run: SubDeleteRun,
 }
 
-// ListRun is executed when user passes the command "list" to ytpodders
-func ListRun(cmd *cobra.Command, args []string) {
+// AddRun is executed when user passes the command "add" to ytpodders
+func SubDeleteRun(cmd *cobra.Command, args []string) {
 	db, err := sqlx.Connect("sqlite3", "ytpodders.db")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
+
+	tx := db.MustBegin()
+	tx.MustExec("DELETE FROM subscriptions WHERE ID=$1", args[0])
+	tx.Commit()
 
 	// query
 	ytSubscriptions := []YTSubscription{}
@@ -39,5 +43,5 @@ func ListRun(cmd *cobra.Command, args []string) {
 }
 
 func init() {
-	RootCmd.AddCommand(ListCmd)
+	RootCmd.AddCommand(SubDeleteCmd)
 }

@@ -25,7 +25,9 @@ import (
 sqlite> .schema subscriptions
 CREATE TABLE subscriptions(
 ID INTEGER PRIMARY KEY,
-suburl CHAR(1024)
+suburl CHAR(1024),
+subtitle CHAR(1024),
+substatus CHAR(64)
 );
 sqlite> .schema subscription_entries
 CREATE TABLE subscription_entries(
@@ -40,16 +42,18 @@ FOREIGN KEY(subscription) REFERENCES subscriptions(ID)
 
 */
 
-// INSERT INTO subscriptions(suburl) VALUES ("https://www.youtube.com/user/durianriders");
-// INSERT INTO subscriptions(suburl) VALUES ("https://www.youtube.com/channel/UCYdkEm-NjhS8TmLVt_qZy9g");
-// INSERT INTO subscriptions(suburl) VALUES ("https://www.youtube.com/user/sciguy14");
-// INSERT INTO subscriptions(suburl) VALUES ("https://www.youtube.com/channel/UCh8rjWtGCIAbwPrZb3Te8bQ");
-// INSERT INTO subscriptions(suburl) VALUES ("https://www.youtube.com/channel/UCSUi7O_Fg6SgwkF2W2Au2Zw");
+// INSERT INTO subscriptions(suburl, subtitle, substatus) VALUES ("https://www.youtube.com/user/durianriders", "durianrider", "enabled");
+// INSERT INTO subscriptions(suburl, subtitle, substatus) VALUES ("https://www.youtube.com/channel/UCYdkEm-NjhS8TmLVt_qZy9g", "Making Stuff", "enabled");
+// INSERT INTO subscriptions(suburl, subtitle, substatus) VALUES ("https://www.youtube.com/user/sciguy14", "Jeremy Blum", "enabled");
+// INSERT INTO subscriptions(suburl, subtitle, substatus) VALUES ("https://www.youtube.com/channel/UCh8rjWtGCIAbwPrZb3Te8bQ", "GEARIST", "enabled");
+// INSERT INTO subscriptions(suburl, subtitle, substatus) VALUES ("https://www.youtube.com/channel/UCSUi7O_Fg6SgwkF2W2Au2Zw", "Anthony Ngu", "enabled");
 
 // YTSubscription is just the URL of each YouTuber you are subscribed to
 type YTSubscription struct {
-	SubID  int64  `db:"ID"`
-	SubURL string `db:"suburl"`
+	SubID     int64  `db:"ID"`
+	SubURL    string `db:"suburl"`
+	SubTitle  string `db:"subtitle"`
+	SubStatus string `db:"substatus"`
 }
 
 // YTSubscriptionEntry has info about each of the parsed and downloaded "episodes" from YouTube
@@ -88,25 +92,6 @@ func RootRun(cmd *cobra.Command, args []string) {
 	var fileSize int64
 	var err error
 
-	// TODO: Add proper Go-style logging everywhere instead of all of these Print statements
-	// TODO: Figure out Windows Scheduler again
-	// TODO: Add proper Set max retention time as parameter in conf.json
-
-	// TODO: Offer a range of commands as follows:
-	// TODO: without params - print help out and exit
-	// TODO: help - print help out and exit
-	// TODO: run - updates everything as you'd expect. Normal one-off execution
-	// TODO: add - add a subscription. Pass it the URL of a YouTube Channel or User (possibly sanitize)
-
-	// TODO: list - list all subscriptions as ID, URL, (Title maybe? or Uploader maybe?)
-
-	// TODO: remove - remove a subscription by ID
-	// TODO: scheduler - runs it as some sort of background daemon. No idea how to to this on Windows
-	// TODO: dryrun - same as run except nothing is downloaded and the database is not modified but it lists what it would do
-	// TODO: prune - pass a number of days as param. Mark entries in DB as "expired". Delete mp3 files locally and from Dropbox. Do not re-download on next run!
-	// TODO: reauth - re-run the Auth flow to get a new Dropbox token
-	// TODO: reinit - Clear the DB completely and delete both local and Dropbox MP3s
-
 	dropboxFolder, err = utils.GetDropboxFolder()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
@@ -114,7 +99,6 @@ func RootRun(cmd *cobra.Command, args []string) {
 	}
 
 	vidcmd := "youtube-dl"
-	//vidcmd := "echo"
 
 	db, err := sqlx.Connect("sqlite3", "ytpodders.db")
 	if err != nil {
@@ -124,7 +108,7 @@ func RootRun(cmd *cobra.Command, args []string) {
 
 	// query
 	ytSubscriptions := []YTSubscription{}
-	err = db.Select(&ytSubscriptions, "SELECT ID, suburl FROM subscriptions")
+	err = db.Select(&ytSubscriptions, "SELECT ID, suburl, subtitle, substatus FROM subscriptions")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)

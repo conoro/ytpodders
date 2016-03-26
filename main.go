@@ -1,9 +1,9 @@
 package main
 
-import(
-    "github.com/conoro/ytpodders/commands"
+import (
+	"github.com/conoro/ytpodders/commands"
 )
 
 func main() {
-    commands.RootCmd.Execute()
+	commands.RootCmd.Execute()
 }

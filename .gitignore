@@ -1,4 +1,7 @@
 ytpodders
+ffmpeg
+ffprobe
+youtube-dl
 conf.json
 podcasts
 pkg
