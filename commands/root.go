@@ -142,7 +142,9 @@ func RootRun(cmd *cobra.Command, args []string) {
 			os.Exit(1)
 		}
 
-		for _, item := range feed.Items {
+		// TODO Limit this to last 5 entries by default and make it configurable
+		feedSlice := feed.Items[0:4]
+		for _, item := range feedSlice {
 			fmt.Println(item.Title)
 			if RSSEntryInDB(item.Link, ytSubscriptionEntries) == false {
 

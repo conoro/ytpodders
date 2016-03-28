@@ -23,12 +23,12 @@ As it is written in Go, it should work on every platform where youtube-dl and ff
 * Unzip that file and put everything in a directory of your choosing
 * TODO: Possibly make the above a single Inno installer for Windows.
 * Edit conf.json and put App Key and App Secret from above in the relevant place in the file and save it
-* Open a Windows CMD window, cd to your directory and type ytpodders
+* Open a Windows CMD window, OSX Terminal or Linux Terminal, cd to your directory and type ytpodders
 * You'll be shown a URL, copy that and open it in your web browser
 * You'll be asked to give permission. Do so and copy the code it gives you
 * Go back to your command window and paste the key into the prompt
-* You'll be given a permanent key
-* Edit conf.json again and paste the key into the relevent place in the file
+* You'll be given a different permanent key
+* Edit conf.json again and paste the permanent key into the relevent place in the file
 * YTPodders will have exited.
 Now you can add subscriptions and have YTPodders generate your Podcast feed for you on Dropbox as follows:
   * ytpodders add url_of_youtube_user_or_channel
@@ -62,6 +62,7 @@ TODO
 - [ ] reinit - Clear the DB completely and delete both local and Dropbox MP3s
 
 ## More TODOs
+- [ ] Add configurable limit on number of videos to download per channel the first time (default 5 seems reasonable)
 - [ ] Error Checking and Handling
 - [ ] Add proper Go-style logging everywhere instead of all of these Print statements
 - [ ] clean up output
