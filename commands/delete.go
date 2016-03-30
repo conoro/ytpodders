@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// AddCmd is the Action to run to add a YouTube Feed to your list
+// SubDeleteCmd is the Action to run to add a YouTube Feed to your list
 var SubDeleteCmd = &cobra.Command{
 	Use:   "delete ID_of_subscription",
 	Short: "delete a ytpodders subscription",
@@ -17,7 +17,7 @@ var SubDeleteCmd = &cobra.Command{
 	Run: SubDeleteRun,
 }
 
-// AddRun is executed when user passes the command "add" to ytpodders
+// SubDeleteRun is executed when user passes the command "add" to ytpodders
 func SubDeleteRun(cmd *cobra.Command, args []string) {
 	db, err := sqlx.Connect("sqlite3", "ytpodders.db")
 	if err != nil {

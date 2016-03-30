@@ -1,3 +1,6 @@
+// TODO Main functionality doesn't work on OSX. Probably errors in the non-local flow. Try to add local flow for OSX and Linux too
+// TODO License
+
 package commands
 
 import (
@@ -17,7 +20,7 @@ import (
 	"github.com/SlyMarbo/rss"
 	"github.com/gorilla/feeds"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/mattn/go-sqlite3" // Any way to avoid blank import?
 	"github.com/spf13/cobra"
 )
 
@@ -66,6 +69,7 @@ type YTSubscriptionEntry struct {
 	FileSize     int64  `db:"filesize"`
 }
 
+// RSSXML is used to build the rss.xml file which you subscribe to in your podcasting app
 var RSSXML = &feeds.Feed{
 	Title:       "YTPodders YouTube Podcasts",
 	Link:        &feeds.Link{Href: "https://ytpodders.com"},
@@ -142,8 +146,8 @@ func RootRun(cmd *cobra.Command, args []string) {
 			os.Exit(1)
 		}
 
-		// TODO Limit this to last 5 entries by default and make it configurable
-		feedSlice := feed.Items[0:4]
+		// TODO: Make limit configurable and handle situation where limit > range
+		feedSlice := feed.Items[:5]
 		for _, item := range feedSlice {
 			fmt.Println(item.Title)
 			if RSSEntryInDB(item.Link, ytSubscriptionEntries) == false {
@@ -194,6 +198,8 @@ func RootRun(cmd *cobra.Command, args []string) {
 					os.Exit(1)
 				}
 				fmt.Println(dropboxURL)
+
+				//TODO - Don't add DB entry until I'm 100% sure the whole end-to-end flow has worked for that entry including Dropbox Sync
 				fmt.Println("Adding new RSS Entry")
 				tx := db.MustBegin()
 				tx.MustExec("INSERT INTO subscription_entries(subscription,url,title,date, dropboxurl, filesize) VALUES($1,$2,$3,$4,$5,$6)", subscription.SubID, item.Link, item.Title, item.Date, dropboxURL, fileSize)
