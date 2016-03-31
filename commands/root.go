@@ -72,7 +72,7 @@ type YTSubscriptionEntry struct {
 // RSSXML is used to build the rss.xml file which you subscribe to in your podcasting app
 var RSSXML = &feeds.Feed{
 	Title:       "YTPodders YouTube Podcasts",
-	Link:        &feeds.Link{Href: "https://ytpodders.com"},
+	Link:        &feeds.Link{Href: "https://ytpodders.com/"},
 	Description: "YouTube Videos converted to Podcasts by YTPodders",
 	Author:      &feeds.Author{Name: "YTPodder", Email: "youtuber@example.com"},
 }
@@ -258,11 +258,13 @@ func addEntrytoRSSXML(ytItem YTSubscriptionEntry) error {
 		os.Exit(1)
 	}
 
+	//TODO Add Icon to feed
+	//TODO Either fix the RSS feed or change the Atom file to atom.xml
 	Item := feeds.Item{
 		Title:       ytItem.Title,
 		Link:        &feeds.Link{Href: ytItem.DropboxURL, Length: strconv.FormatInt(ytItem.FileSize, 10), Type: "audio/mpeg"},
 		Description: ytItem.Title,
-		Author:      &feeds.Author{Name: "YTPodder", Email: "youtuber@example.com"},
+		Author:      &feeds.Author{Name: "YTPodder@example.com (YTPodder)", Email: "YTPodder@example.com"},
 		Created:     timeStamp,
 	}
 
@@ -275,7 +277,7 @@ func generateRSS(dropboxFolder string) (string, error) {
 	now := time.Now()
 	RSSXML.Created = now
 
-	rss, err := RSSXML.ToRss()
+	rss, err := RSSXML.ToAtom()
 	if err != nil {
 		return "", err
 	}
