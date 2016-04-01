@@ -200,6 +200,7 @@ func RootRun(cmd *cobra.Command, args []string) {
 				fmt.Println(dropboxURL)
 
 				//TODO - Don't add DB entry until I'm 100% sure the whole end-to-end flow has worked for that entry including Dropbox Sync
+				// TODO: Seem to be getting duplicates in RSS file but not the DB. Why?
 				fmt.Println("Adding new RSS Entry")
 				tx := db.MustBegin()
 				tx.MustExec("INSERT INTO subscription_entries(subscription,url,title,date, dropboxurl, filesize) VALUES($1,$2,$3,$4,$5,$6)", subscription.SubID, item.Link, item.Title, item.Date, dropboxURL, fileSize)
@@ -209,6 +210,7 @@ func RootRun(cmd *cobra.Command, args []string) {
 		}
 
 		// Add all entries to RSSXML struct which will be used to generate the rss.xml file
+		// TODO: Maybe add DISTINCT here
 		ytAllSubscriptionEntries := []YTSubscriptionEntry{}
 		err = db.Select(&ytAllSubscriptionEntries, "SELECT subscription, url, title, date, dropboxurl, filesize FROM subscription_entries")
 		if err != nil {
