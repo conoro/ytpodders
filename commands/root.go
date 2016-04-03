@@ -81,13 +81,8 @@ var RSSXML = &feeds.Feed{
 var RootCmd = &cobra.Command{
 	Use:   "ytpodders",
 	Short: "YTPodders creates subscribable MP3 podcasts from YouTube Users and Channels using Dropbox",
-	Long: `Each time you run YTPodders, it checks the list of YouTube Users and Channels that you have added here for new uploads. It grabs those using youtube-dl and converts them
-            to MP3s. It then copiesor uploads the MP3s to your Dropbox account. Finally
-						it updates rss.xml and provides you with its URL. You can add this URL to your
-						poscast app on your phone e.g. BeyondPod on Android and then automatically get
-						the audio of those YouTubers on your phone when your podcast app updates.
-            `,
-	Run: RootRun,
+	Long:  `Each time you run YTPodders, it checks the list of YouTube Users and Channels that you have added here for new uploads. It grabs those using youtube-dl and converts them to MP3s. It then copiesor uploads the MP3s to your Dropbox account. Finally it updates rss.xml and provides you with its URL. You can add this URL to your podcast app on your phone e.g. BeyondPod on Android and then automatically get the audio of those YouTubers on your phone when your podcast app updates.`,
+	Run:   RootRun,
 }
 
 // RootRun is executed when user passes no arguments to ytpodders
@@ -112,7 +107,7 @@ func RootRun(cmd *cobra.Command, args []string) {
 
 	// query
 	ytSubscriptions := []YTSubscription{}
-	err = db.Select(&ytSubscriptions, "SELECT ID, suburl, subtitle, substatus FROM subscriptions")
+	err = db.Select(&ytSubscriptions, "SELECT DISTINCT ID, suburl, subtitle, substatus FROM subscriptions")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
@@ -121,19 +116,19 @@ func RootRun(cmd *cobra.Command, args []string) {
 	for _, subscription := range ytSubscriptions {
 
 		ytSubscriptionEntries := []YTSubscriptionEntry{}
-		err = db.Select(&ytSubscriptionEntries, "SELECT subscription, url, title, date FROM subscription_entries WHERE subscription=$1", subscription.SubID)
+		err = db.Select(&ytSubscriptionEntries, "SELECT DISTINCT subscription, url, title, date FROM subscription_entries WHERE subscription=$1", subscription.SubID)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error: %v\n", err)
 			os.Exit(1)
 		}
-		fmt.Println(subscription)
-		fmt.Println(ytSubscriptionEntries)
+		// fmt.Println(subscription)
+		//fmt.Println(ytSubscriptionEntries)
 
 		var feedURL string
 
 		split := strings.Split(subscription.SubURL, "/")
 		feedid := split[len(split)-1]
-		fmt.Println(feedid)
+		// fmt.Println(feedid)
 
 		if strings.Contains(subscription.SubURL, "channel") {
 			feedURL = "https://www.youtube.com/feeds/videos.xml?channel_id=" + feedid
@@ -149,7 +144,7 @@ func RootRun(cmd *cobra.Command, args []string) {
 		// TODO: Make limit configurable and handle situation where limit > range
 		feedSlice := feed.Items[:5]
 		for _, item := range feedSlice {
-			fmt.Println(item.Title)
+			//fmt.Println(item.Title)
 			if RSSEntryInDB(item.Link, ytSubscriptionEntries) == false {
 
 				args1 := []string{"-v", "--extract-audio", "--audio-format", "mp3", "-o", "./podcasts/%(uploader)s/%(title)s.%(ext)s", item.Link}
@@ -173,8 +168,8 @@ func RootRun(cmd *cobra.Command, args []string) {
 
 				mp3FileLocalStyle := ytdlPath
 				mp3FileRemoteStyle := "/" + strings.Replace(ytdlPath, "\\", "/", -1)
-				fmt.Println(mp3FileLocalStyle)
-				fmt.Println(mp3FileRemoteStyle)
+				// fmt.Println(mp3FileLocalStyle)
+				// fmt.Println(mp3FileRemoteStyle)
 
 				fileSize, _ = getFileSize(mp3FileLocalStyle)
 
@@ -197,11 +192,11 @@ func RootRun(cmd *cobra.Command, args []string) {
 					fmt.Fprintf(os.Stderr, "error: %v\n", err)
 					os.Exit(1)
 				}
-				fmt.Println(dropboxURL)
+				// fmt.Println(dropboxURL)
 
 				//TODO - Don't add DB entry until I'm 100% sure the whole end-to-end flow has worked for that entry including Dropbox Sync
 				// TODO: Seem to be getting duplicates in RSS file but not the DB. Why?
-				fmt.Println("Adding new RSS Entry")
+				fmt.Printf("Adding new RSS Entry %s \n", item.Title)
 				tx := db.MustBegin()
 				tx.MustExec("INSERT INTO subscription_entries(subscription,url,title,date, dropboxurl, filesize) VALUES($1,$2,$3,$4,$5,$6)", subscription.SubID, item.Link, item.Title, item.Date, dropboxURL, fileSize)
 				tx.Commit()
@@ -209,26 +204,27 @@ func RootRun(cmd *cobra.Command, args []string) {
 			}
 		}
 
-		// Add all entries to RSSXML struct which will be used to generate the rss.xml file
-		// TODO: Maybe add DISTINCT here
-		ytAllSubscriptionEntries := []YTSubscriptionEntry{}
-		err = db.Select(&ytAllSubscriptionEntries, "SELECT subscription, url, title, date, dropboxurl, filesize FROM subscription_entries")
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "error: %v\n", err)
-			os.Exit(1)
-		}
-		for _, ytItem := range ytAllSubscriptionEntries {
-			addEntrytoRSSXML(ytItem)
-		}
 	}
 
-	// Create and update rss.xml
-	RSSFile, err := generateRSS(dropboxFolder + "\\Apps\\YTPodders\\")
+	// Add all entries to RSSXML struct which will be used to generate the rss.xml file
+	ytAllSubscriptionEntries := []YTSubscriptionEntry{}
+	err = db.Select(&ytAllSubscriptionEntries, "SELECT DISTINCT subscription, url, title, date, dropboxurl, filesize FROM subscription_entries")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
-	fmt.Println(RSSFile)
+	for _, ytItem := range ytAllSubscriptionEntries {
+		addEntrytoRSSXML(ytItem)
+		//fmt.Println(ytItem)
+	}
+
+	// Create and update rss.xml
+	_, err = generateRSS(dropboxFolder + "\\Apps\\YTPodders\\")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
+	}
+	// fmt.Println(RSSFile)
 
 	// When Dropbox has synced, return the URL of rss.xml to the User
 	RSSFileURL, err := utils.GetDropboxURLWhenSyncComplete("rss.xml")
@@ -236,7 +232,7 @@ func RootRun(cmd *cobra.Command, args []string) {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
-	fmt.Println(RSSFileURL)
+	fmt.Printf("Subscribe to this RSS URL in your Podcasting App: %s", RSSFileURL)
 
 }
 
@@ -300,7 +296,7 @@ func getFileSize(srcFile string) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	fmt.Printf("The file is %d bytes long", fi.Size())
+	// fmt.Printf("The file is %d bytes long", fi.Size())
 	return fi.Size(), nil
 
 }

@@ -85,7 +85,7 @@ func GetDropboxFolder() (string, error) {
 	// If it exists then read it and base64 decode the second line of its contents to get the root path of the Dropbox files for this user
 	// Then just do a local OS file copy to the right path instead of using db.UploadFile
 	if _, err = os.Stat(os.Getenv("LOCALAPPDATA") + "\\Dropbox\\host.db"); err == nil {
-		fmt.Printf("It's local baby!\n")
+		fmt.Println("Running in Local Dropbox Mode")
 
 		var dropboxDefFile *os.File
 		dropboxDefFile, err = os.Open(os.Getenv("LOCALAPPDATA") + "\\Dropbox\\host.db")
@@ -109,7 +109,7 @@ func GetDropboxFolder() (string, error) {
 			return "", err
 		}
 		dropboxFolder = string(sDec)
-		fmt.Println(dropboxFolder)
+		//fmt.Println(dropboxFolder)
 		return dropboxFolder, nil
 	}
 	return "remote", nil
@@ -152,7 +152,7 @@ func CopyLocallyToDropbox(srcFile string, destFolder string) error {
 func CopyRemotelyToDropbox(srcFile string, destPath string) error {
 	var rev string
 
-	fmt.Printf("It's remote baby!\n")
+	fmt.Printf("Running in Remote Dropbox Mode\n")
 
 	if _, err = db.UploadFile(srcFile, destPath, true, rev); err != nil {
 		fmt.Printf("Error uploading file: %s\n", err)
@@ -170,7 +170,7 @@ func GetDropboxURLWhenSyncComplete(destFile string) (string, error) {
 	timeout := time.After(6 * time.Minute)
 
 	// Check every 20 seconds
-	tick := time.Tick(20000 * time.Millisecond)
+	tick := time.Tick(10000 * time.Millisecond)
 	// Keep trying until we're timed out or got a result or got an error
 	for {
 		select {
@@ -199,6 +199,6 @@ func GetDropboxURL(destFile string) (string, error) {
 	}
 	s := strings.Split(dropboxLink.URL, "?")
 	dlLink := s[0] + "?raw=1"
-	fmt.Printf("MP3 Direct download URL is: %s\n", dlLink)
+	//fmt.Printf("MP3 Direct download URL is: %s\n", dlLink)
 	return dlLink, nil
 }
