@@ -18,7 +18,7 @@ import (
 	"github.com/conoro/ytpodders/utils"
 
 	"github.com/SlyMarbo/rss"
-	"github.com/gorilla/feeds"
+	"github.com/conoro/feeds"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3" // Any way to avoid blank import?
 	"github.com/spf13/cobra"
