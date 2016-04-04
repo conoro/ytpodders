@@ -1,0 +1,73 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "S4Fko30cceG/aNqXJ4sEdKjBSd8=",
+			"path": "github.com/PuerkitoBio/goquery",
+			"revision": "4126223a86db8598275b29db04d511cfdab67cf1",
+			"revisionTime": "2016-02-16T20:35:17-05:00"
+		},
+		{
+			"checksumSHA1": "Irn8emv4tLzixAWwokHDV6vSzcw=",
+			"path": "github.com/SlyMarbo/rss",
+			"revision": "5e6e66b814395e9f52074d642e50cbeb9b6c1f8f",
+			"revisionTime": "2016-02-22T21:03:54Z"
+		},
+		{
+			"checksumSHA1": "YKJEHQmesxr6ExwGE4WZrpQsq4s=",
+			"path": "github.com/andybalholm/cascadia",
+			"revision": "3ad29d1ad1c4f2023e355603324348cf1f4b2d48",
+			"revisionTime": "2015-07-30T10:44:59-07:00"
+		},
+		{
+			"checksumSHA1": "ucu0eJ90b2Jlj+KPt0YJzGfwm7s=",
+			"path": "github.com/axgle/mahonia",
+			"revision": "c528b747d92d41ca581a7acf3e604c396fc7c034",
+			"revisionTime": "2015-10-19T08:40:08+08:00"
+		},
+		{
+			"checksumSHA1": "kUWB9OSjROzcXYZQtjh2eEEKllw=",
+			"path": "github.com/conoro/feeds",
+			"revision": "b498ee59c2392ddb4d0f421b350dc3bf5b5da267",
+			"revisionTime": "2016-04-04T13:11:49+01:00"
+		},
+		{
+			"checksumSHA1": "40vJyUB4ezQSn/NSadsKEOrudMc=",
+			"path": "github.com/inconshreveable/mousetrap",
+			"revision": "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75",
+			"revisionTime": "2014-10-17T13:07:13-07:00"
+		},
+		{
+			"checksumSHA1": "K33xdaNbpTxlDZbenJzT9PzTyvM=",
+			"path": "github.com/jmoiron/sqlx",
+			"revision": "398dd5876282499cdfd4cb8ea0f31a672abe9495",
+			"revisionTime": "2016-02-06T17:15:33-05:00"
+		},
+		{
+			"checksumSHA1": "+RvZCOJFqe6JTUopcQYYYT6h2sA=",
+			"path": "github.com/mattn/go-sqlite3",
+			"revision": "37aa7c6f5bc95b7264de70cd1f0ca1d39228ebd6",
+			"revisionTime": "2016-03-25T01:18:33+09:00"
+		},
+		{
+			"checksumSHA1": "/r7cjQsFAPHwW1vUgbP0/WFZVPE=",
+			"path": "github.com/spf13/cobra",
+			"revision": "4c05eb1145f16d0e6bb4a3e1b6d769f4713cb41f",
+			"revisionTime": "2016-04-03T09:08:35-05:00"
+		},
+		{
+			"checksumSHA1": "MrBzoMkuXdrGKo09/ka+JCC2Mlk=",
+			"path": "github.com/spf13/pflag",
+			"revision": "7f60f83a2c81bc3c3c0d5297f61ddfa68da9d3b7",
+			"revisionTime": "2015-10-24T12:54:09+02:00"
+		},
+		{
+			"checksumSHA1": "blsdwknHVr/fzjF56+gUDPN+ya0=",
+			"path": "github.com/stacktic/dropbox",
+			"revision": "b7d75fe25567416e18bf8eac04bd19cbda425214",
+			"revisionTime": "2015-08-04T19:56:54+02:00"
+		}
+	],
+	"rootPath": "github.com/conoro/ytpodders"
+}
