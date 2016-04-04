@@ -67,6 +67,24 @@
 			"path": "github.com/stacktic/dropbox",
 			"revision": "b7d75fe25567416e18bf8eac04bd19cbda425214",
 			"revisionTime": "2015-08-04T19:56:54+02:00"
+		},
+		{
+			"checksumSHA1": "9QKY4bQlbQ/VZZFP8/1WtH4b0mA=",
+			"path": "golang.org/x/net/context",
+			"revision": "024ed629fd292398cfd43c9678a5bf004f7defdc",
+			"revisionTime": "2016-04-03T12:24:15-07:00"
+		},
+		{
+			"checksumSHA1": "vqc3a+oTUGX8PmD0TS+qQ7gmN8I=",
+			"path": "golang.org/x/net/html",
+			"revision": "024ed629fd292398cfd43c9678a5bf004f7defdc",
+			"revisionTime": "2016-04-03T12:24:15-07:00"
+		},
+		{
+			"checksumSHA1": "mktBVED98G2vv+OKcSgtnFVZC1Y=",
+			"path": "golang.org/x/oauth2",
+			"revision": "33fa30fe45020622640e947917fd1fc4c81e3dce",
+			"revisionTime": "2016-03-25T10:08:19-07:00"
 		}
 	],
 	"rootPath": "github.com/conoro/ytpodders"
