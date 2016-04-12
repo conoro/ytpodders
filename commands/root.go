@@ -208,12 +208,11 @@ func RootRun(cmd *cobra.Command, args []string) {
 
 	// Add all entries to RSSXML struct which will be used to generate the rss.xml file
 	ytAllSubscriptionEntries := []YTSubscriptionEntry{}
-	err = db.Select(&ytAllSubscriptionEntries, "SELECT DISTINCT subscription, url, title, date, dropboxurl, filesize FROM subscription_entries")
+	err = db.Select(&ytAllSubscriptionEntries, "SELECT DISTINCT subscription, url, title, date, dropboxurl, filesize FROM subscription_entries ORDER BY date DESC")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
-	//TODO: Change the order (in SELECT above) so newest is first in RSS file output
 	for _, ytItem := range ytAllSubscriptionEntries {
 		addEntrytoRSSXML(ytItem)
 		//fmt.Println(ytItem)
