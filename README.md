@@ -21,7 +21,6 @@ As it is written in Go, it should work on every platform where youtube-dl and ff
 * Click "Show" on App Secret and note it
 * Download conf.json, YTPodders binary, youtube-dl, ffmpeg and ffprobe binaries as one download here.
 * Unzip that file and put everything in a directory of your choosing
-* TODO: Possibly make the above a single Inno installer for Windows.
 * Edit conf.json and put App Key and App Secret from above in the relevant place in the file and save it
 * Open a Windows CMD window, OSX Terminal or Linux Terminal, cd to your directory and type ytpodders
 * You'll be shown a URL, copy that and open it in your web browser
@@ -32,11 +31,10 @@ As it is written in Go, it should work on every platform where youtube-dl and ff
 * YTPodders will have exited.
 Now you can add subscriptions and have YTPodders generate your Podcast feed for you on Dropbox as follows:
   * ytpodders add url_of_youtube_user_or_channel
-  * ytpodders run
+  * ytpodders.exe or ./ytpodders, depending on your platform
   * After the run is completed, take the RSS URL presented and paste it into your Podcasting App on your phone e.g. [BeyondPod](http://www.beyondpod.mobi/android/index.htm) on Android or the built-in iPhone Podcasting App
   * You can continue to add/delete/list/enable/disable subscriptions and run ytpodders whenever you wish to get the latest
-  * Linux and OSX users can setup a Cronjob to do this automatically whenever they want
-  * TODO: Windows users scheduling
+  * It takes just a minute to add ytpodders to the Windows Task Scheduler so that it runs automatically whenever you want. Ditto as a cronjob on Linux.
 
 ## Development Installation
 * Basically the same as the above except
@@ -55,17 +53,17 @@ You can use the following commands:
 - [x] delete - delete a subscription by ID
 
 TODO
-- [ ] scheduler - runs it as some sort of background daemon. No idea how to to this on Windows
 - [ ] dryrun - same as run except nothing is downloaded and the database is not modified but it lists what it would do
 - [ ] prune - pass a number of days as param. Mark entries in DB as "expired". Delete mp3 files locally and from Dropbox. Do not re-download on next run!
 - [ ] reauth - re-run the Auth flow to get a new Dropbox token
 - [ ] reinit - Clear the DB completely and delete both local and Dropbox MP3s
 
 ## More TODOs
-- [ ] Add configurable limit on number of videos to download per channel the first time (default 5 seems reasonable)
-- [ ] Error Checking and Handling
+- [ ] Switch back to RSS (http://www.danfergusdesign.com/classfiles/generalReference/rssFeedSample.php) from ATOM so I can use elements like <itunes:image href="https://ytpodders.com/YTPodders_1400x1400_iTunes.png"/>
+- [ ] scheduling on OSX how? cron?
+- [ ] Add configurable limit on number of videos to download per channel (default 5 seems reasonable)
+- [ ] Improved Error Checking and Handling
 - [ ] Add proper Go-style logging everywhere instead of all of these Print statements
-- [ ] clean up output
 - [ ] Add proper Set max retention time as parameter in conf.json
 - [ ] sanitize the addition of URLs
 - [ ] validate removal by ID.
