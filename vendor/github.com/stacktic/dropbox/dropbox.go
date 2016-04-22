@@ -349,6 +349,8 @@ func getResponse(r *http.Response) ([]byte, error) {
 			return nil, newErrorf(r.StatusCode, "wrong parameter")
 		}
 	}
+	fmt.Println(b)
+	fmt.Println(r)
 	return nil, newErrorf(r.StatusCode, "unexpected HTTP status code %d", r.StatusCode)
 }
 
@@ -669,6 +671,8 @@ func (db *Dropbox) doRequest(method, path string, params *url.Values, receiver i
 		params.Set("locale", db.Locale)
 	}
 	rawurl = fmt.Sprintf("%s/%s?%s", db.APIURL, urlEncode(path), params.Encode())
+	//rawurl = fmt.Sprintf("%s%s/?%s", "https://api.dropbox.com/1/shares/auto", path, params.Encode())
+
 	if request, err = http.NewRequest(method, rawurl, nil); err != nil {
 		return err
 	}
@@ -676,6 +680,20 @@ func (db *Dropbox) doRequest(method, path string, params *url.Values, receiver i
 		return err
 	}
 	defer response.Body.Close()
+
+	if response.StatusCode == http.StatusMovedPermanently {
+		fmt.Println("got redirect, new URL being tried is: ")
+		rawurl = fmt.Sprintf("https://api.dropbox.com%s", response.Header.Get("Location"))
+		fmt.Println(rawurl)
+		if request, err = http.NewRequest(method, rawurl, nil); err != nil {
+			return err
+		}
+		if response, err = db.client().Do(request); err != nil {
+			return err
+		}
+		defer response.Body.Close()
+	}
+
 	if body, err = getResponse(response); err != nil {
 		return err
 	}
@@ -698,6 +716,7 @@ func (db *Dropbox) Shares(path string, shortURL bool) (*Link, error) {
 
 	params = &url.Values{"short_url": {strconv.FormatBool(shortURL)}}
 	act := strings.Join([]string{"shares", db.RootDirectory, path}, "/")
+	//act := path
 	err := db.doRequest("POST", act, params, &rv)
 	return &rv, err
 }

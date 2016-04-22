@@ -167,6 +167,7 @@ func CopyRemotelyToDropbox(srcFile string, destPath string) error {
 func GetDropboxURLWhenSyncComplete(destFile string) (string, error) {
 
 	// 6 minutes seems a reasonable timeout for an MP3 to upload from Local to Remote
+	// TODO: Make configurable
 	timeout := time.After(6 * time.Minute)
 
 	// Check every 20 seconds
@@ -192,8 +193,10 @@ func GetDropboxURLWhenSyncComplete(destFile string) (string, error) {
 
 // GetDropboxURL retrieves the direct download URL for a file
 func GetDropboxURL(destFile string) (string, error) {
+	fmt.Println(destFile)
 	// Need to get Download URL of the Dropbox file so I can add to rss.xml
 	if dropboxLink, err = db.Shares(destFile, false); err != nil {
+		fmt.Printf("dropboxLink: %s\n", dropboxLink.URL)
 		fmt.Printf("%s: %s\n", destFile, err)
 		return "", err
 	}
