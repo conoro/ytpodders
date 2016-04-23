@@ -17,7 +17,6 @@ As it is written in Go, it should work on every platform where youtube-dl and ff
 * Copy the access token provided above to the obvious place in conf_client.json
 * Open a CMD prompt and cd to the directory where you unzipped ytpodders
 * ytpodders add https://www.youtube.com/url_of_your_fave_youtuber
-* ytpodders
 * ytpodders.exe or ./ytpodders, depending on your platform
 * After the run is completed, take the RSS URL presented and paste it into your Podcasting App on your phone e.g. [BeyondPod](http://www.beyondpod.mobi/android/index.htm) on Android or the built-in iPhone Podcasting App
 * You can continue to add/delete/list/enable/disable subscriptions and run ytpodders whenever you wish to get the latest
