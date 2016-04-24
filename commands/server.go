@@ -43,7 +43,9 @@ var (
 )
 
 const htmlIndex = `<html><body>
-Log in with <a href="/login">Dropbox</a>
+<img src = "YTPodders_256x256_gradient.png" />
+<br />
+<a href="/login"><img src = "connect_with_dropbox.png" /></a>
 </body></html>
 `
 
@@ -78,7 +80,7 @@ func ServerRun(cmd *cobra.Command, args []string) {
 	http.HandleFunc("/login", handleDropboxLogin)
 	http.HandleFunc("/dropbox_oauth_cb", handleDropboxCallback)
 	fmt.Print("Started running on http://127.0.0.1\n")
-	fmt.Println(http.ListenAndServe(config.ServerPort, nil))
+	fmt.Println(http.ListenAndServe(":"+config.ServerPort, nil))
 
 }
 
@@ -116,4 +118,8 @@ func handleDropboxCallback(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("Save this token in client_conf.json: %s\n", token)
 	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 
+}
+
+func init() {
+	RootCmd.AddCommand(ServerCmd)
 }

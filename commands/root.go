@@ -1,5 +1,4 @@
 // TODO Main functionality doesn't work on OSX. Probably errors in the non-local flow. Try to add local flow for OSX and Linux too
-// TODO License
 
 package commands
 
@@ -81,7 +80,7 @@ var RSSXML = &feeds.Feed{
 var RootCmd = &cobra.Command{
 	Use:   "ytpodders",
 	Short: "YTPodders creates subscribable MP3 podcasts from YouTube Users and Channels using Dropbox",
-	Long:  `Each time you run YTPodders, it checks the list of YouTube Users and Channels that you have added here for new uploads. It grabs those using youtube-dl and converts them to MP3s. It then copiesor uploads the MP3s to your Dropbox account. Finally it updates rss.xml and provides you with its URL. You can add this URL to your podcast app on your phone e.g. BeyondPod on Android and then automatically get the audio of those YouTubers on your phone when your podcast app updates.`,
+	Long:  `Each time you run YTPodders, it checks the list of YouTube Users and Channels that you have added here for new uploads. It grabs those using youtube-dl and converts them to MP3s. It then copies or uploads the MP3s to your Dropbox account. Finally it updates rss.xml and provides you with its URL. You can add this URL to your podcast app on your phone e.g. BeyondPod on Android and then automatically get the audio of those YouTubers on your phone when your podcast app updates.`,
 	Run:   RootRun,
 }
 
