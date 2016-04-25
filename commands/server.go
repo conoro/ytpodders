@@ -42,12 +42,12 @@ var (
 	oauthStateString = ""
 )
 
-const htmlIndex = `<html><body>
-<img src = "YTPodders_256x256_gradient.png" />
-<br />
-<a href="/login"><img src = "connect_with_dropbox.png" /></a>
-</body></html>
-`
+//const htmlIndex = `<html><body>
+//<img src = "YTPodders_256x256_gradient.png" />
+//<br />
+//<a href="/login"><img src = "connect_with_dropbox.png" /></a>
+//</body></html>
+//`
 
 // ServerCmd is the Action to run to run a Server to Authorise the App to use Dropbox
 var ServerCmd = &cobra.Command{
@@ -76,7 +76,10 @@ func ServerRun(cmd *cobra.Command, args []string) {
 	oauthConf.RedirectURL = config.ServerURL + "/dropbox_oauth_cb"
 	oauthStateString = config.OauthStateString
 
-	http.HandleFunc("/", handleMain)
+	fs := http.FileServer(http.Dir("static"))
+	http.Handle("/", fs)
+
+	//http.HandleFunc("/", handleMain)
 	http.HandleFunc("/login", handleDropboxLogin)
 	http.HandleFunc("/dropbox_oauth_cb", handleDropboxCallback)
 	fmt.Print("Started running on http://127.0.0.1\n")
@@ -85,11 +88,11 @@ func ServerRun(cmd *cobra.Command, args []string) {
 }
 
 // /
-func handleMain(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(htmlIndex))
-}
+//func handleMain(w http.ResponseWriter, r *http.Request) {
+//	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+//	w.WriteHeader(http.StatusOK)
+//	w.Write([]byte(htmlIndex))
+//}
 
 // /login
 func handleDropboxLogin(w http.ResponseWriter, r *http.Request) {
