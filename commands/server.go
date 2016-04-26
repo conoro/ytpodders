@@ -3,6 +3,7 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -14,6 +15,7 @@ import (
 
 var db *dropbox.Dropbox
 var dropboxLink *dropbox.Link
+var UserToken string
 var err error
 
 // ServerConfiguration from conf.json
@@ -42,12 +44,12 @@ var (
 	oauthStateString = ""
 )
 
-const htmlIndex = `<html><body>
-<img src = "YTPodders_256x256_gradient.png" />
-<br />
-<a href="/login"><img src = "connect_with_dropbox.png" /></a>
-</body></html>
-`
+//const htmlIndex = `<html><body>
+//<img src = "YTPodders_256x256_gradient.png" />
+//<br />
+//<a href="/login"><img src = "connect_with_dropbox.png" /></a>
+//</body></html>
+//`
 
 // ServerCmd is the Action to run to run a Server to Authorise the App to use Dropbox
 var ServerCmd = &cobra.Command{
@@ -76,20 +78,24 @@ func ServerRun(cmd *cobra.Command, args []string) {
 	oauthConf.RedirectURL = config.ServerURL + "/dropbox_oauth_cb"
 	oauthStateString = config.OauthStateString
 
-	http.HandleFunc("/", handleMain)
+	fs := http.FileServer(http.Dir("static"))
+	http.Handle("/", fs)
+
+	//http.HandleFunc("/", handleMain)
 	http.HandleFunc("/login", handleDropboxLogin)
 	http.HandleFunc("/dropbox_oauth_cb", handleDropboxCallback)
+	http.HandleFunc("/success", handleSuccess)
 	fmt.Print("Started running on http://127.0.0.1\n")
 	fmt.Println(http.ListenAndServe(":"+config.ServerPort, nil))
 
 }
 
 // /
-func handleMain(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(htmlIndex))
-}
+//func handleMain(w http.ResponseWriter, r *http.Request) {
+//	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+//	w.WriteHeader(http.StatusOK)
+//	w.Write([]byte(htmlIndex))
+//}
 
 // /login
 func handleDropboxLogin(w http.ResponseWriter, r *http.Request) {
@@ -99,7 +105,6 @@ func handleDropboxLogin(w http.ResponseWriter, r *http.Request) {
 
 // /dropbox_oauth_cb. Called by Dropbox after authorization is granted
 func handleDropboxCallback(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Got Callback from Dropbox")
 	state := r.FormValue("state")
 	if state != oauthStateString {
 		fmt.Printf("invalid oauth state, expected '%s', got '%s'\n", oauthStateString, state)
@@ -115,9 +120,29 @@ func handleDropboxCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Printf("Save this token in client_conf.json: %s\n", token)
-	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+	fmt.Printf("Save this token in client_conf.json: %s\n", token.AccessToken)
+	//http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+	UserToken = token.AccessToken
+	http.Redirect(w, r, "/success", http.StatusTemporaryRedirect)
+}
 
+// /dropbox_oauth_cb. Called by Dropbox after authorization is granted
+func handleSuccess(w http.ResponseWriter, r *http.Request) {
+	type Page struct {
+		UserToken string
+	}
+
+	p := Page{
+		UserToken: UserToken,
+	}
+
+	tmpl, err := template.ParseFiles("templates/success.html.tmpl") // Parse template file.
+	if err != nil {
+		fmt.Printf("Error rendering template with '%s'\n", err)
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+	tmpl.Execute(w, p)
 }
 
 func init() {
