@@ -17,8 +17,24 @@ As it is written in Go, it should work on every platform where youtube-dl and ff
 * Go to https://ytpodders.com and follow the permission flow
 * Copy the access token provided above to the obvious place in client_conf.json
 * Open a CMD prompt and cd to the directory where you unzipped ytpodders
-* ytpodders add https://www.youtube.com/url_of_your_fave_youtuber
-* ytpodders.exe or ./ytpodders, depending on your platform
+* Add subscriptions to each of your fave YouTubers using
+
+``` 
+ytpodders add https://www.youtube.com/url_of_your_fave_youtuber
+```
+* For example:
+
+```
+ytpodders add https://www.youtube.com/user/TheGingerRunner 
+ytpodders add https://www.youtube.com/channel/UCh8rjWtGCIAbwPrZb3Te8bQ
+```
+
+* Grab all the latest entries using:
+
+```
+ytpodders.exe or ./ytpodders, depending on your platform
+```
+
 * After the run is completed, take the RSS URL presented and paste it into your Podcasting App on your phone e.g. [BeyondPod](http://www.beyondpod.mobi/android/index.htm) on Android or the built-in iPhone Podcasting App
 * You can continue to add/delete/list/enable/disable subscriptions and run ytpodders whenever you wish to get the latest
 * It takes just a minute to add ytpodders to the Windows Task Scheduler so that it runs automatically whenever you want. Ditto as a cronjob on Linux.
