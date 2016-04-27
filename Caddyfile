@@ -1,0 +1,7 @@
+ytpodders.com {
+	proxy / localhost:7000
+}
+
+bollox.ytpodders.com {
+	proxy / localhost:1337
+}

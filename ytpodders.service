@@ -1,0 +1,17 @@
+[Unit]
+Description=YTPodders
+Documentation=https://ytpodders.com/
+After=network.target
+
+[Service]
+User=centos
+#Group=some_group
+WorkingDirectory=/home/centos/gitwork/go/src/github.com/conoro/ytpodders
+LimitNOFILE=4096
+PIDFile=/var/run/caddy/ytpodders.pid
+ExecStart=/home/centos/gitwork/go/src/github.com/conoro/ytpodders/ytpodders server
+Restart=on-failure
+StartLimitInterval=600
+
+[Install]
+WantedBy=multi-user.target
