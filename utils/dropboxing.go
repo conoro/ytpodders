@@ -34,7 +34,7 @@ func GetDropboxFolder() (string, error) {
 	var clientid, clientsecret, token string
 	var dropboxFolder string
 	// Read configuration from conf.json
-	conffile, _ := os.Open("conf.json")
+	conffile, _ := os.Open("client_conf.json")
 	decoder := json.NewDecoder(conffile)
 	config := Configuration{}
 	err = decoder.Decode(&config)
