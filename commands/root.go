@@ -231,7 +231,7 @@ func RootRun(cmd *cobra.Command, args []string) {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
-	fmt.Printf("Subscribe to this RSS URL in your Podcasting App: %s", RSSFileURL)
+	fmt.Printf("\n\nSubscribe to this RSS URL in your Podcasting App: %s\n\n", RSSFileURL)
 
 }
 

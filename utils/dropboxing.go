@@ -19,9 +19,7 @@ import (
 
 // Configuration from conf.json
 type Configuration struct {
-	ClientID     string `json:"clientid"`
-	ClientSecret string `json:"clientsecret"`
-	Token        string `json:"token"`
+	Token string `json:"token"`
 }
 
 var db *dropbox.Dropbox
@@ -43,43 +41,24 @@ func GetDropboxFolder() (string, error) {
 		return "", err
 	}
 
-	clientid = config.ClientID
-	clientsecret = config.ClientSecret
-
+	// Using placeholders since you just need token
+	clientid = "placeholder"
+	clientsecret = "placeholder"
 	token = config.Token
 
-	// 1. Create a new dropbox object.
 	db = dropbox.NewDropbox()
-
-	// 2. Provide your clientid and clientsecret (see prerequisite).
 	db.SetAppInfo(clientid, clientsecret)
+	db.SetAccessToken(token)
 
-	// If token isn't set in conf.json, go through Dropbox Auth flow to get one
-	if token == "" {
-
-		// This method will ask the user to visit an URL and paste the generated code.
-		if err = db.Auth(); err != nil {
-			fmt.Println(err)
-			return "", err
-		}
-		// You can now retrieve the token if you want.
-		token = db.AccessToken()
-
-		// 3. Provide the user token.
-		db.SetAccessToken(token)
-
-		// 4. Send your commands.
-		folder := "podcasts"
-		if _, err = db.CreateFolder(folder); err != nil {
+	folder := "podcasts"
+	if _, err = db.CreateFolder(folder); err != nil {
+		if err.Error() != "Cannot create folder 'podcasts' because a file or folder already exists at path '/podcasts'" {
 			fmt.Printf("Error creating folder %s: %s\n", folder, err)
-		} else {
-			fmt.Printf("Folder %s successfully created\n", folder)
 		}
-		fmt.Println("Please set the token parameter in conf.json to: ", token)
 	} else {
-		// 3. Provide the user token.
-		db.SetAccessToken(token)
+		fmt.Printf("Folder %s successfully created\n", folder)
 	}
+
 	// Only use this if running on a Server, not your local PC. Because it uploads to Cloud and then Dropbox syncs back down. So double the bandwidth
 	// Do this by checking for the existence of (on Windows only obvs) %APPDATA%\Dropbox\host.db
 	// If it exists then read it and base64 decode the second line of its contents to get the root path of the Dropbox files for this user
@@ -193,7 +172,7 @@ func GetDropboxURLWhenSyncComplete(destFile string) (string, error) {
 
 // GetDropboxURL retrieves the direct download URL for a file
 func GetDropboxURL(destFile string) (string, error) {
-	fmt.Println(destFile)
+	//fmt.Println(destFile)
 	// Need to get Download URL of the Dropbox file so I can add to rss.xml
 	if dropboxLink, err = db.Shares(destFile, false); err != nil {
 		fmt.Printf("dropboxLink: %s\n", dropboxLink.URL)

@@ -11,9 +11,10 @@ All the generated MP3s are stored in your Dropbox Folder and an rss.xml file is 
 As it is written in Go, it should work on every platform where youtube-dl and ffmpeg are available.
 
 ## End-User Installation and First Time Run
-* Download the App as [one download here]()
+* Download the App as one download here TODO
 * Unzip into a directory of your choice
 * Rename client_conf_example.json to client_conf.json
+* Delete ytpodders.db and rename ytpodders_no_entries.db to ytpodders.db
 * Go to https://ytpodders.com and follow the permission flow
 * Copy the access token provided above to the obvious place in client_conf.json
 * Open a CMD prompt and cd to the directory where you unzipped ytpodders
@@ -63,7 +64,7 @@ ytpodders.exe or ./ytpodders, depending on your platform
 * You can now browse to http://url_of_your_server and follow the auth flow to get a token. Note it down
 
 ### Client
-* Download YTPodders binary, youtube-dl, ffmpeg and ffprobe binaries as [one download here]().
+* Download YTPodders binary, youtube-dl, ffmpeg and ffprobe binaries as one download here TODO
 * On your client machine download the [ytpodders source code](https://github.com/conoro/ytpodders) via git clone or [zip download](https://github.com/conoro/ytpodders/archive/master.zip) into $GOPATH/src/github.com/conoro/ytpodders
 * go build github.com/conoro/ytpodders to create the ytpodders binary
 * The rest of the steps are the same as the End-User ones.
