@@ -3,10 +3,10 @@
 	"ignore": "test",
 	"package": [
 		{
-			"checksumSHA1": "S4Fko30cceG/aNqXJ4sEdKjBSd8=",
+			"checksumSHA1": "kNvIxjs3Hd0nopHlzwIQl2bA4OI=",
 			"path": "github.com/PuerkitoBio/goquery",
-			"revision": "4126223a86db8598275b29db04d511cfdab67cf1",
-			"revisionTime": "2016-02-16T20:35:17-05:00"
+			"revision": "2e29ea41f0d13f4a303c75553f4eeadddc7a4c56",
+			"revisionTime": "2016-04-08T11:41:18Z"
 		},
 		{
 			"checksumSHA1": "Irn8emv4tLzixAWwokHDV6vSzcw=",
