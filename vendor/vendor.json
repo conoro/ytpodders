@@ -27,10 +27,14 @@
 			"revisionTime": "2015-10-19T08:40:08+08:00"
 		},
 		{
+			"path": "github.com/conor/feeds",
+			"revision": ""
+		},
+		{
 			"checksumSHA1": "kUWB9OSjROzcXYZQtjh2eEEKllw=",
 			"path": "github.com/conoro/feeds",
 			"revision": "b498ee59c2392ddb4d0f421b350dc3bf5b5da267",
-			"revisionTime": "2016-04-04T13:11:49+01:00"
+			"revisionTime": "2016-04-04T12:11:49Z"
 		},
 		{
 			"checksumSHA1": "40vJyUB4ezQSn/NSadsKEOrudMc=",
