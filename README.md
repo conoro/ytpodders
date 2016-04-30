@@ -1,32 +1,28 @@
 # YTPodders
-YTPodders creates subscribable MP3 podcasts from YouTube Users and Channels using Dropbox.
+YTPodders - Get your favourite YouTubers as audio podcasts on your phone
 
-It uses [youtube-dl](https://rg3.github.io/youtube-dl/) and [ffmpeg](https://www.ffmpeg.org/) to do all of the heavy lifting and stores all of your subscriptions in SQLite. You can download these here:
+YTPodders creates subscribable MP3 podcasts, for your personal use, from YouTube Users and Channels using Dropbox.
 
-* [youtube-dl]()
-* [ffmpeg](https://www.ffmpeg.org/download.html) and [ffprobe](https://www.ffmpeg.org/download.html)
-
-All the generated MP3s are stored in your Dropbox Folder and an rss.xml file is generated which can be used by your phone's Podcasting App to subscribe.
-
-As it is written in Go, it should work on every platform where youtube-dl and ffmpeg are available.
 
 ## End-User Installation and First Time Run
-* Download the App as one download here TODO
+* Download the App (and all of the tools) as one zip file here:
+  * [Windows]()
+  * [Mac]()
+  * [Linux]()
 * Unzip into a directory of your choice
 * Rename client_conf_example.json to client_conf.json
-* Delete ytpodders.db and rename ytpodders_no_entries.db to ytpodders.db
 * Go to https://ytpodders.com and follow the permission flow
 * Copy the access token provided above to the obvious place in client_conf.json
 * Open a CMD prompt and cd to the directory where you unzipped ytpodders
 * Add subscriptions to each of your fave YouTubers using
 
-``` 
+```
 ytpodders add https://www.youtube.com/url_of_your_fave_youtuber
 ```
 * For example:
 
 ```
-ytpodders add https://www.youtube.com/user/TheGingerRunner 
+ytpodders add https://www.youtube.com/user/TheGingerRunner
 ytpodders add https://www.youtube.com/channel/UCh8rjWtGCIAbwPrZb3Te8bQ
 ```
 
@@ -41,6 +37,17 @@ ytpodders.exe or ./ytpodders, depending on your platform
 * It takes just a minute to add ytpodders to the Windows Task Scheduler so that it runs automatically whenever you want. Ditto as a cronjob on Linux.
 
 ## Developer Installation
+It uses [youtube-dl](https://rg3.github.io/youtube-dl/) and [ffmpeg](https://www.ffmpeg.org/) to do all of the heavy lifting and stores all of your subscriptions in SQLite.
+
+You can download the tools here:
+
+* [youtube-dl](https://rg3.github.io/youtube-dl/)
+* [ffmpeg](https://www.ffmpeg.org/download.html)
+* [ffprobe](https://www.ffmpeg.org/download.html)
+
+All the generated MP3s are stored in your Dropbox Folder and an rss.xml file is generated which can be used by your phone's Podcasting App to subscribe.
+
+As it is written in Go, it should work on every platform where youtube-dl and ffmpeg are available.
 
 ### Web Server
 * Go to https://www.dropbox.com/developers/apps/create
@@ -64,8 +71,8 @@ ytpodders.exe or ./ytpodders, depending on your platform
 * You can now browse to http://url_of_your_server and follow the auth flow to get a token. Note it down
 
 ### Client
-* Download YTPodders binary, youtube-dl, ffmpeg and ffprobe binaries as one download here TODO
 * On your client machine download the [ytpodders source code](https://github.com/conoro/ytpodders) via git clone or [zip download](https://github.com/conoro/ytpodders/archive/master.zip) into $GOPATH/src/github.com/conoro/ytpodders
+* Download youtube-dl, ffmpeg and ffprobe as above to that directory too
 * go build github.com/conoro/ytpodders to create the ytpodders binary
 * The rest of the steps are the same as the End-User ones.
 

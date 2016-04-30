@@ -1,0 +1,7 @@
+{
+    "clientid": "from https://www.dropbox.com/developers/apps/create > Dropbox API > App Folder",
+    "clientsecret": "from https://www.dropbox.com/developers/apps/create > Dropbox API > App Folder",
+    "serverurl": "https://www.ytpodders.com",
+    "serverport": "7000",
+    "oauthstatestring": "putrandomthinghere"
+}
