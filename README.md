@@ -7,13 +7,12 @@ YTPodders creates subscribable MP3 podcasts, for your personal use, from YouTube
 ## End-User Installation and First Time Run
 * Download the App (and all of the tools) as one zip file here:
   * [Windows]()
-  * [Mac]()
-  * [Linux]()
+  * [Mac](). You need Python already installed and remember to chmod a+rx youtube-dl
+  * [Linux](). You need Python already installed and remember to chmod a+rx youtube-dl
 * Unzip into a directory of your choice
-* Rename client_conf_example.json to client_conf.json
-* Go to https://ytpodders.com and follow the permission flow
+* Go to https://ytpodders.com and follow the Authorisation flow to get an access token
 * Copy the access token provided above to the obvious place in client_conf.json
-* Open a CMD prompt and cd to the directory where you unzipped ytpodders
+* Open a CMD prompt or shell and cd to the directory where you unzipped ytpodders
 * Add subscriptions to each of your fave YouTubers using
 
 ```
