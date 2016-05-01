@@ -7,6 +7,10 @@
     <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
   </head>
   <body>
+    <script src="js/clipboard.min.js"></script>
+    <script>
+    var clipboard = new Clipboard('.btn');
+    </script>
     <div class="container">
     <div class="row">
             <div class="col-lg-12">
@@ -17,9 +21,14 @@
               <div class="bs-component">
                          <div class="alert alert-dismissible alert-success">
                            <button type="button" class="close" data-dismiss="alert">&times;</button>
-                           <strong>Success!</strong> Please paste this token into the appropriate place in client_conf.json:
-                           <br />
-                           {{ .UserToken }}
+                           <strong>Success!</strong> Please paste the token below into the appropriate place in client_conf.json
+                         </div>
+                         <div class="form-group">
+                           <label for="usr">Token:</label>
+                           <input type="text" class="form-control" id="copyme" readonly value={{ .UserToken }}>
+                         </div>
+                         <div>
+                           <button class="btn btn-default" data-clipboard-action="copy" data-clipboard-target="#copyme">Copy to clipboard</button>
                          </div>
               </div>
             </div>
