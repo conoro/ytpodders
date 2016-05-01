@@ -59,12 +59,11 @@ func GetDropboxFolder() (string, error) {
 		fmt.Printf("Folder %s successfully created\n", folder)
 	}
 
-	// Only use this if running on a Server, not your local PC. Because it uploads to Cloud and then Dropbox syncs back down. So double the bandwidth
-	// Do this by checking for the existence of (on Windows only obvs) %APPDATA%\Dropbox\host.db
+	// Checking for the existence of (on Windows only obvs) %APPDATA%\Dropbox\host.db
 	// If it exists then read it and base64 decode the second line of its contents to get the root path of the Dropbox files for this user
 	// Then just do a local OS file copy to the right path instead of using db.UploadFile
 	if _, err = os.Stat(os.Getenv("LOCALAPPDATA") + "\\Dropbox\\host.db"); err == nil {
-		fmt.Println("Running in Local Dropbox Mode")
+		fmt.Println("Running in Windows Local Dropbox Mode")
 
 		var dropboxDefFile *os.File
 		dropboxDefFile, err = os.Open(os.Getenv("LOCALAPPDATA") + "\\Dropbox\\host.db")
@@ -91,8 +90,10 @@ func GetDropboxFolder() (string, error) {
 		//fmt.Println(dropboxFolder)
 		return dropboxFolder, nil
 	}
+	// Only use this if running on Linux or OSX or somewhere where Dropbox is not actually installed
+	// If running locally on Linux/OSX with Dropbox installed, the bandwidth usage is doubled since it uploads to Cloud and then Dropbox syncs back down. So double the bandwidth
+	fmt.Println("Running in non-Windows Dropbox Mode")
 	return "remote", nil
-
 }
 
 // CopyLocallyToDropbox copies file to local Dropbox FS - Windows only at the moment

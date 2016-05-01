@@ -173,12 +173,14 @@ func RootRun(cmd *cobra.Command, args []string) {
 				fileSize, _ = getFileSize(mp3FileLocalStyle)
 
 				if dropboxFolder != "remote" {
+					// Running locally on Windows with Dropbox installed
 					err = utils.CopyLocallyToDropbox(mp3FileLocalStyle, dropboxFolder+"\\Apps\\YTPodders\\")
 					if err != nil {
 						fmt.Fprintf(os.Stderr, "Copy to Local Dropbox Error: %v\n", err)
 						os.Exit(1)
 					}
 				} else {
+					// Running on OSX or Linux or somewhere where Dropbox is not installed
 					err = utils.CopyRemotelyToDropbox("."+mp3FileRemoteStyle, mp3FileRemoteStyle)
 					if err != nil {
 						fmt.Fprintf(os.Stderr, "error: %v\n", err)
@@ -218,12 +220,28 @@ func RootRun(cmd *cobra.Command, args []string) {
 	}
 
 	// Create and update rss.xml
-	_, err = generateRSS(dropboxFolder + "\\Apps\\YTPodders\\")
+	_, err = generateRSS()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
-	// fmt.Println(RSSFile)
+
+	// Copy rss.xml to Dropbox
+	if dropboxFolder != "remote" {
+		// Running locally on Windows with Dropbox installed
+		err = utils.CopyLocallyToDropbox("rss.xml", dropboxFolder+"\\Apps\\YTPodders\\")
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Copy to Local Dropbox Error: %v\n", err)
+			os.Exit(1)
+		}
+	} else {
+		// Running on OSX or Linux or somewhere where Dropbox is not installed
+		err = utils.CopyRemotelyToDropbox("./rss.xml", "/rss.xml")
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			os.Exit(1)
+		}
+	}
 
 	// When Dropbox has synced, return the URL of rss.xml to the User
 	RSSFileURL, err := utils.GetDropboxURLWhenSyncComplete("rss.xml")
@@ -270,7 +288,8 @@ func addEntrytoRSSXML(ytItem YTSubscriptionEntry) error {
 
 }
 
-func generateRSS(dropboxFolder string) (string, error) {
+// Create rss.xml
+func generateRSS() (string, error) {
 	now := time.Now()
 	RSSXML.Created = now
 
@@ -282,8 +301,7 @@ func generateRSS(dropboxFolder string) (string, error) {
 
 	rssOut := []byte(rss)
 
-	// TODO: Need to add remote upload of this file when not running on local PC
-	rssFile := dropboxFolder + "rss.xml"
+	rssFile := "rss.xml"
 	err = ioutil.WriteFile(rssFile, rssOut, 0644)
 	if err != nil {
 		return "", err

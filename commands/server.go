@@ -15,6 +15,8 @@ import (
 
 var db *dropbox.Dropbox
 var dropboxLink *dropbox.Link
+
+// UserToken is the Dropbox token
 var UserToken string
 var err error
 
