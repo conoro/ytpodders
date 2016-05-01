@@ -3,7 +3,7 @@
 	"ignore": "test",
 	"package": [
 		{
-			"checksumSHA1": "kNvIxjs3Hd0nopHlzwIQl2bA4OI=",
+			"checksumSHA1": "p8yjyy3BQ+xNrXt2ppfMTY4ENjc=",
 			"path": "github.com/PuerkitoBio/goquery",
 			"revision": "2e29ea41f0d13f4a303c75553f4eeadddc7a4c56",
 			"revisionTime": "2016-04-08T11:41:18Z"
@@ -25,10 +25,6 @@
 			"path": "github.com/axgle/mahonia",
 			"revision": "c528b747d92d41ca581a7acf3e604c396fc7c034",
 			"revisionTime": "2015-10-19T08:40:08+08:00"
-		},
-		{
-			"path": "github.com/conor/feeds",
-			"revision": ""
 		},
 		{
 			"checksumSHA1": "kUWB9OSjROzcXYZQtjh2eEEKllw=",
