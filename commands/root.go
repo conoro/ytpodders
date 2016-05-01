@@ -98,6 +98,11 @@ func RootRun(cmd *cobra.Command, args []string) {
 
 	vidcmd := "youtube-dl"
 
+    // Deal with OSX and Linux not finding ffmpeg/ffprobe in current directory
+	if dropboxFolder == "remote" {
+		vidcmd = "PATH=$PATH:$(pwd) youtube-dl"					
+	}
+				
 	db, err := sqlx.Connect("sqlite3", "ytpodders.db")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
