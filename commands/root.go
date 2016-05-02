@@ -98,11 +98,11 @@ func RootRun(cmd *cobra.Command, args []string) {
 
 	vidcmd := "youtube-dl"
 
-    // Deal with OSX and Linux not finding ffmpeg/ffprobe in current directory
+	// Deal with OSX and Linux not finding ffmpeg/ffprobe in current directory
 	if dropboxFolder == "remote" {
-		vidcmd = "PATH=$PATH:$(pwd) youtube-dl"					
+		vidcmd = "PATH=$PATH:$(pwd) youtube-dl"
 	}
-				
+
 	db, err := sqlx.Connect("sqlite3", "ytpodders.db")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
@@ -202,7 +202,7 @@ func RootRun(cmd *cobra.Command, args []string) {
 
 				//TODO - Don't add DB entry until I'm 100% sure the whole end-to-end flow has worked for that entry including Dropbox Sync
 				// TODO: Seem to be getting duplicates in RSS file but not the DB. Why?
-				fmt.Printf("Adding new RSS Entry %s \n", item.Title)
+				fmt.Printf("Adding new RSS Entry:   %s \n", item.Title)
 				tx := db.MustBegin()
 				tx.MustExec("INSERT INTO subscription_entries(subscription,url,title,date, dropboxurl, filesize) VALUES($1,$2,$3,$4,$5,$6)", subscription.SubID, item.Link, item.Title, item.Date, dropboxURL, fileSize)
 				tx.Commit()

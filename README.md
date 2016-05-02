@@ -101,3 +101,4 @@ TODO
 - [ ] validate removal by ID
 - [ ] remove all MP3s locally and on Dropbox when deleting
 - [ ] remove all the entries in subscription_entries when deleting
+- [ ] Generate releases and upload to S3 using some CI tool (OSX a challenge)

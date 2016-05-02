@@ -132,13 +132,13 @@ func CopyLocallyToDropbox(srcFile string, destFolder string) error {
 func CopyRemotelyToDropbox(srcFile string, destPath string) error {
 	var rev string
 
-	fmt.Printf("Running in Remote Dropbox Mode\n")
+	// fmt.Printf("Running in Remote Dropbox Mode\n")
 
 	if _, err = db.UploadFile(srcFile, destPath, true, rev); err != nil {
 		fmt.Printf("Error uploading file: %s\n", err)
 		return err
 	}
-	fmt.Printf("File successfully uploaded\n")
+	fmt.Printf("File successfully uploaded: %s\n", srcFile)
 	return nil
 }
 
