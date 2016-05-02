@@ -102,3 +102,18 @@ TODO
 - [ ] remove all MP3s locally and on Dropbox when deleting
 - [ ] remove all the entries in subscription_entries when deleting
 - [ ] Generate releases and upload to S3 using some CI tool (OSX a challenge)
+
+## Notes to self on Systemd, Caddy and YTPodders
+
+```bash
+sudo setcap cap_net_bind_service=+ep ~/gitwork/go/bin/caddy
+cd ~/gitwork/go/src/github.com/conoro/ytpodders
+sudo cp *.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable caddy
+sudo systemctl enable ytpodders
+sudo systemctl start caddy
+sudo systemctl start ytpodders
+sudo systemctl status caddy
+sudo systemctl status ytpodders
+```

@@ -1,6 +1,6 @@
 [Unit]
-Description=YTPodders
-Documentation=https://ytpodders.com/
+Description=Caddy webserver
+Documentation=https://caddyserver.com/
 Wants=network-online.target
 After=network-online.target
 
@@ -9,8 +9,8 @@ User=centos
 #Group=some_group
 WorkingDirectory=/home/centos/gitwork/go/src/github.com/conoro/ytpodders
 LimitNOFILE=4096
-PIDFile=/var/run/ytpodders/ytpodders.pid
-ExecStart=/home/centos/gitwork/go/src/github.com/conoro/ytpodders/ytpodders server
+PIDFile=/var/run/caddy/caddy.pid
+ExecStart=/home/centos/gitwork/go/bin/caddy -agree -email conor@conoroneill.com -pidfile=/var/run/caddy/caddy.pid
 Restart=on-failure
 StartLimitInterval=600
 
