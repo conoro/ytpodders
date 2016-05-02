@@ -1,14 +1,14 @@
 # YTPodders
-YTPodders - Get your favourite YouTubers as audio podcasts on your phone
+YTPodders - Get your favourite YouTubers as audio podcasts on your phone.
 
 YTPodders creates subscribable MP3 podcasts, for your personal use, from YouTube Users and Channels using Dropbox.
 
 
 ## End-User Installation and First Time Run
 * Download the App (and all of the tools) as one zip file here:
-  * [Windows]()
-  * [Mac](). You need Python already installed and remember to chmod a+rx youtube-dl
-  * [Linux](). You need Python already installed and remember to chmod a+rx youtube-dl
+  * [Windows](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_windows_20160502a.zip)
+  * [Mac](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_mac_20160502a.zip). You need Python already installed and remember to chmod a+rx youtube-dl
+  * [Linux](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_linux_20160502a.zip). Remember to chmod a+rx youtube-dl
 * Unzip into a directory of your choice
 * Go to https://ytpodders.com and follow the Authorisation flow to get an access token
 * Copy the access token provided above to the obvious place in client_conf.json
@@ -81,14 +81,13 @@ You can use the following commands:
 - [x] no command - updates everything as you'd expect. Normal one-off execution
 - [x] help - print help out and exit
 - [x] add - add a subscription. Pass it the URL of a YouTube Channel or User (TODO: sanitize input)
-- [x] list - list all subscriptions as ID, URL, Title maybe
+- [x] list - list all subscriptions
 - [x] delete - delete a subscription by ID
 - [x] server - run a web-server as a developer which lets users authorise the app to access Dropbox
 
 TODO
 - [ ] dryrun - same as run except nothing is downloaded and the database is not modified but it lists what it would do
 - [ ] prune - pass a number of days as param. Mark entries in DB as "expired". Delete mp3 files locally and from Dropbox. Do not re-download on next run!
-- [ ] reauth - re-run the Auth flow to get a new Dropbox token
 - [ ] reinit - Clear the DB completely and delete both local and Dropbox MP3s
 
 ## More TODOs
@@ -102,6 +101,9 @@ TODO
 - [ ] remove all MP3s locally and on Dropbox when deleting
 - [ ] remove all the entries in subscription_entries when deleting
 - [ ] Generate releases and upload to S3 using some CI tool (OSX a challenge)
+- [ ] Automatically do the Auth flow and save client_conf.json for non-technical users
+- [ ] Use the Web App to add/remove/manage subscriptions for very non-technical users
+
 
 ## Notes to self on Systemd, Caddy and YTPodders
 

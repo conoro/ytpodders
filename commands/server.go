@@ -46,13 +46,6 @@ var (
 	oauthStateString = ""
 )
 
-//const htmlIndex = `<html><body>
-//<img src = "YTPodders_256x256_gradient.png" />
-//<br />
-//<a href="/login"><img src = "connect_with_dropbox.png" /></a>
-//</body></html>
-//`
-
 // ServerCmd is the Action to run to run a Server to Authorise the App to use Dropbox
 var ServerCmd = &cobra.Command{
 	Use:   "server",
@@ -92,13 +85,6 @@ func ServerRun(cmd *cobra.Command, args []string) {
 
 }
 
-// /
-//func handleMain(w http.ResponseWriter, r *http.Request) {
-//	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-//	w.WriteHeader(http.StatusOK)
-//	w.Write([]byte(htmlIndex))
-//}
-
 // /login
 func handleDropboxLogin(w http.ResponseWriter, r *http.Request) {
 	url := oauthConf.AuthCodeURL(oauthStateString)
@@ -123,7 +109,6 @@ func handleDropboxCallback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Printf("Save this token in client_conf.json: %s\n", token.AccessToken)
-	//http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 	UserToken = token.AccessToken
 	http.Redirect(w, r, "/success", http.StatusTemporaryRedirect)
 }
