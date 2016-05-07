@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jmoiron/sqlx"
+	"github.com/asdine/storm"
 	"github.com/spf13/cobra"
 )
 
@@ -19,19 +19,28 @@ var SubDeleteCmd = &cobra.Command{
 
 // SubDeleteRun is executed when user passes the command "add" to ytpodders
 func SubDeleteRun(cmd *cobra.Command, args []string) {
-	db, err := sqlx.Connect("sqlite3", "ytpodders.db")
+	db, err := storm.Open("ytpodders.boltdb", storm.AutoIncrement())
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer db.Close()
+
+	var ytSubscription YTSubscription
+	err = db.One("ID", args[0], &ytSubscription)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
 
-	tx := db.MustBegin()
-	tx.MustExec("DELETE FROM subscriptions WHERE ID=$1", args[0])
-	tx.Commit()
+	err = db.Remove(&ytSubscription)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
+	}
 
 	// query
-	ytSubscriptions := []YTSubscription{}
-	err = db.Select(&ytSubscriptions, "SELECT ID, suburl, subtitle, substatus FROM subscriptions")
+	var ytSubscriptions []YTSubscription
+	err = db.All(&ytSubscriptions)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)

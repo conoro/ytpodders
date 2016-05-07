@@ -15,55 +15,28 @@ import (
 	"github.com/conoro/ytpodders/utils"
 
 	"github.com/SlyMarbo/rss"
+	"github.com/asdine/storm"
 	"github.com/conoro/feeds"
-	"github.com/jmoiron/sqlx"
-	_ "github.com/mattn/go-sqlite3" // Any way to avoid blank import?
 	"github.com/spf13/cobra"
 )
 
-/*
-sqlite> .schema subscriptions
-CREATE TABLE subscriptions(
-ID INTEGER PRIMARY KEY,
-suburl CHAR(1024),
-subtitle CHAR(1024),
-substatus CHAR(64)
-);
-sqlite> .schema subscription_entries
-CREATE TABLE subscription_entries(
-subscription INTEGER,
-url TEXT,
-title TEXT,
-date TEXT,
-dropboxurl TEXT,
-filesize INTEGER,
-FOREIGN KEY(subscription) REFERENCES subscriptions(ID)
-);
-
-*/
-
-// INSERT INTO subscriptions(suburl, subtitle, substatus) VALUES ("https://www.youtube.com/user/durianriders", "durianrider", "enabled");
-// INSERT INTO subscriptions(suburl, subtitle, substatus) VALUES ("https://www.youtube.com/channel/UCYdkEm-NjhS8TmLVt_qZy9g", "Making Stuff", "enabled");
-// INSERT INTO subscriptions(suburl, subtitle, substatus) VALUES ("https://www.youtube.com/user/sciguy14", "Jeremy Blum", "enabled");
-// INSERT INTO subscriptions(suburl, subtitle, substatus) VALUES ("https://www.youtube.com/channel/UCh8rjWtGCIAbwPrZb3Te8bQ", "GEARIST", "enabled");
-// INSERT INTO subscriptions(suburl, subtitle, substatus) VALUES ("https://www.youtube.com/channel/UCSUi7O_Fg6SgwkF2W2Au2Zw", "Anthony Ngu", "enabled");
-
 // YTSubscription is just the URL of each YouTuber you are subscribed to
 type YTSubscription struct {
-	SubID     int64  `db:"ID"`
-	SubURL    string `db:"suburl"`
-	SubTitle  string `db:"subtitle"`
-	SubStatus string `db:"substatus"`
+	ID        int
+	SubURL    string `storm:"unique"`
+	SubTitle  string
+	SubStatus string
 }
 
 // YTSubscriptionEntry has info about each of the parsed and downloaded "episodes" from YouTube
 type YTSubscriptionEntry struct {
-	Subscription int64  `db:"subscription"`
-	URL          string `db:"url"`
-	Title        string `db:"title"`
-	Date         string `db:"date"`
-	DropboxURL   string `db:"dropboxurl"`
-	FileSize     int64  `db:"filesize"`
+	ID           int
+	Subscription int    `storm:"index"`
+	URL          string `storm:"unique"`
+	Title        string
+	Date         time.Time `storm:"index"`
+	DropboxURL   string
+	FileSize     int64
 }
 
 // RSSXML is used to build the rss.xml file which you subscribe to in your podcasting app
@@ -101,27 +74,25 @@ func RootRun(cmd *cobra.Command, args []string) {
 		vidcmd = "./youtube-dl"
 	}
 
-	db, err := sqlx.Connect("sqlite3", "ytpodders.db")
+	db, err := storm.Open("ytpodders.boltdb", storm.AutoIncrement())
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
+		fmt.Println(err)
 	}
+	defer db.Close()
 
 	// query
-	ytSubscriptions := []YTSubscription{}
-	err = db.Select(&ytSubscriptions, "SELECT DISTINCT ID, suburl, subtitle, substatus FROM subscriptions")
+	var ytSubscriptions []YTSubscription
+	err = db.All(&ytSubscriptions)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
 	}
 
 	for _, subscription := range ytSubscriptions {
 
-		ytSubscriptionEntries := []YTSubscriptionEntry{}
-		err = db.Select(&ytSubscriptionEntries, "SELECT DISTINCT subscription, url, title, date FROM subscription_entries WHERE subscription=$1", subscription.SubID)
+		var ytSubscriptionEntries []YTSubscriptionEntry
+		err = db.Find("Subscription", subscription.ID, &ytSubscriptionEntries)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error: %v\n", err)
-			os.Exit(1)
 		}
 		// fmt.Println(subscription)
 		//fmt.Println(ytSubscriptionEntries)
@@ -199,24 +170,35 @@ func RootRun(cmd *cobra.Command, args []string) {
 				// fmt.Println(dropboxURL)
 
 				//TODO - Don't add DB entry until I'm 100% sure the whole end-to-end flow has worked for that entry including Dropbox Sync
-				// TODO: Seem to be getting duplicates in RSS file but not the DB. Why?
 				fmt.Printf("Adding new RSS Entry:   %s \n", item.Title)
-				tx := db.MustBegin()
-				tx.MustExec("INSERT INTO subscription_entries(subscription,url,title,date, dropboxurl, filesize) VALUES($1,$2,$3,$4,$5,$6)", subscription.SubID, item.Link, item.Title, item.Date, dropboxURL, fileSize)
-				tx.Commit()
+				entry := YTSubscriptionEntry{
+					Subscription: subscription.ID,
+					URL:          item.Link,
+					Title:        item.Title,
+					Date:         item.Date,
+					DropboxURL:   dropboxURL,
+					FileSize:     fileSize,
+				}
+
+				fmt.Println(entry)
+
+				err = db.Save(&entry)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "error: %v\n", err)
+				}
 
 			}
 		}
 
 	}
 
-	// Add all entries to RSSXML struct which will be used to generate the rss.xml file
-	ytAllSubscriptionEntries := []YTSubscriptionEntry{}
-	err = db.Select(&ytAllSubscriptionEntries, "SELECT DISTINCT subscription, url, title, date, dropboxurl, filesize FROM subscription_entries ORDER BY date DESC")
+	// Add all entries to struct which will be used to generate the rss.xml file
+	var ytAllSubscriptionEntries []YTSubscriptionEntry
+	err = db.AllByIndex("Date", &ytAllSubscriptionEntries)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
 	}
+
 	for _, ytItem := range ytAllSubscriptionEntries {
 		addEntrytoRSSXML(ytItem)
 		//fmt.Println(ytItem)
@@ -268,8 +250,9 @@ func RSSEntryInDB(link string, dbentries []YTSubscriptionEntry) bool {
 
 func addEntrytoRSSXML(ytItem YTSubscriptionEntry) error {
 
-	layOut := "2006-01-02 15:04:05-07:00"
-	timeStamp, err := time.Parse(layOut, ytItem.Date)
+	//	layOut := "2006-01-02 15:04:05-07:00"
+	//	timeStamp, err := time.Parse(layOut, ytItem.Date)
+	timeStamp := ytItem.Date
 
 	if err != nil {
 		fmt.Println(err)
