@@ -1,5 +1,3 @@
-// TODO Main functionality doesn't work on OSX. Probably errors in the non-local flow. Try to add local flow for OSX and Linux too
-
 package commands
 
 import (
