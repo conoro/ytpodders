@@ -47,6 +47,8 @@ var RSSXML = &feeds.Feed{
 	Author:      &feeds.Author{Name: "YTPodder", Email: "youtuber@example.com"},
 }
 
+const remote string = "remote"
+
 // RootCmd is the Action to run if no command specified. In our case this is a full update of all the feeds and podcasts
 var RootCmd = &cobra.Command{
 	Use:   "ytpodders",
@@ -70,7 +72,7 @@ func RootRun(cmd *cobra.Command, args []string) {
 	vidcmd := "youtube-dl"
 
 	// Deal with OSX and Linux not finding ffmpeg/ffprobe in current directory
-	if dropboxFolder == "remote" {
+	if dropboxFolder == remote {
 		vidcmd = "./youtube-dl"
 	}
 
@@ -146,7 +148,7 @@ func RootRun(cmd *cobra.Command, args []string) {
 
 				fileSize, _ = getFileSize(mp3FileLocalStyle)
 
-				if dropboxFolder != "remote" {
+				if dropboxFolder != remote {
 					// Running locally on Windows with Dropbox installed
 					err = utils.CopyLocallyToDropbox(mp3FileLocalStyle, dropboxFolder+"\\Apps\\YTPodders\\")
 					if err != nil {
@@ -212,7 +214,7 @@ func RootRun(cmd *cobra.Command, args []string) {
 	}
 
 	// Copy rss.xml to Dropbox
-	if dropboxFolder != "remote" {
+	if dropboxFolder != remote {
 		// Running locally on Windows with Dropbox installed
 		err = utils.CopyLocallyToDropbox("rss.xml", dropboxFolder+"\\Apps\\YTPodders\\")
 		if err != nil {
@@ -279,10 +281,10 @@ func generateRSS() (string, error) {
 	now := time.Now()
 	RSSXML.Created = now
 
-	rss, err := RSSXML.ToAtom()
+	rss, error := RSSXML.ToAtom()
 	//rss, err := RSSXML.ToRss()
-	if err != nil {
-		return "", err
+	if error != nil {
+		return "", error
 	}
 
 	rssOut := []byte(rss)
@@ -296,9 +298,9 @@ func generateRSS() (string, error) {
 }
 
 func getFileSize(srcFile string) (int64, error) {
-	fi, err := os.Stat(srcFile)
-	if err != nil {
-		return 0, err
+	fi, error := os.Stat(srcFile)
+	if error != nil {
+		return 0, error
 	}
 	// fmt.Printf("The file is %d bytes long", fi.Size())
 	return fi.Size(), nil
