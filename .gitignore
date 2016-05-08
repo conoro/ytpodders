@@ -11,6 +11,7 @@ ffmpeg.exe
 ffprobe
 ffprobe.exe
 ytpodders.db
+ytpodders.boltdb
 rss.xml
 
 
