@@ -73,7 +73,7 @@ func RootRun(cmd *cobra.Command, args []string) {
 
 	// Deal with OSX and Linux not finding ffmpeg/ffprobe in current directory
 	if dropboxFolder == remote {
-		vidcmd = "./youtube-dl"
+		vidcmd = "./youtube-dl.sh"
 	}
 
 	db, err := storm.Open("ytpodders.boltdb", storm.AutoIncrement())
