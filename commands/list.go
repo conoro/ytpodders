@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jmoiron/sqlx"
+	"github.com/asdine/storm"
 	"github.com/spf13/cobra"
 )
 
@@ -19,15 +19,14 @@ var ListCmd = &cobra.Command{
 
 // ListRun is executed when user passes the command "list" to ytpodders
 func ListRun(cmd *cobra.Command, args []string) {
-	db, err := sqlx.Connect("sqlite3", "ytpodders.db")
+	db, err := storm.Open("ytpodders.boltdb", storm.AutoIncrement())
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
+		fmt.Println(err)
 	}
+	defer db.Close()
 
-	// query
-	ytSubscriptions := []YTSubscription{}
-	err = db.Select(&ytSubscriptions, "SELECT ID, suburl, subtitle, substatus FROM subscriptions")
+	var ytSubscriptions []YTSubscription
+	err = db.All(&ytSubscriptions)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)

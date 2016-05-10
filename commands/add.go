@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/jmoiron/sqlx"
+	"github.com/asdine/storm"
 	"github.com/spf13/cobra"
 )
 
@@ -44,19 +44,22 @@ func AddRun(cmd *cobra.Command, args []string) {
 			title = con
 		}
 	})
-	db, err := sqlx.Connect("sqlite3", "ytpodders.db")
+	db, err := storm.Open("ytpodders.boltdb", storm.AutoIncrement())
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
+		fmt.Println(err)
+	}
+	defer db.Close()
+
+	ytsub := YTSubscription{
+		SubURL:    args[0],
+		SubTitle:  title,
+		SubStatus: "enabled",
 	}
 
-	tx := db.MustBegin()
-	tx.MustExec("INSERT INTO subscriptions(suburl, subtitle, substatus) VALUES($1,$2,$3)", args[0], title, "enabled")
-	tx.Commit()
+	err = db.Save(&ytsub)
 
-	// query
-	ytSubscriptions := []YTSubscription{}
-	err = db.Select(&ytSubscriptions, "SELECT ID, suburl, subtitle, substatus FROM subscriptions")
+	var ytSubscriptions []YTSubscription
+	err = db.All(&ytSubscriptions)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
