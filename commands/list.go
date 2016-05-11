@@ -27,7 +27,7 @@ func ListRun(cmd *cobra.Command, args []string) {
 
 	var ytSubscriptions []YTSubscription
 	err = db.All(&ytSubscriptions)
-	if err != nil {
+	if err != nil && err.Error() != "bucket YTSubscription not found" && err.Error() != "bucket YTSubscriptionEntry not found" {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}

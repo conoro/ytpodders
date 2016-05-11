@@ -6,14 +6,26 @@ YTPodders creates subscribable MP3 podcasts, for your personal use, from YouTube
 
 ## End-User Installation and First Time Run
 * Download the App (and all of the tools) as one zip file here:
-  * [Windows](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_windows_20160502a.zip)
-  * [Mac](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_mac_20160502a.zip). You need Python already installed and remember to chmod a+rx youtube-dl
-  * [Linux](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_linux_20160502a.zip). Remember to chmod a+rx youtube-dl
+  * [Windows](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_windows_v1.1.0.zip)
+  * [Mac](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_mac_v1.1.0.zip). You need Python already installed and remember to
+
+  ```
+  chmod a+rx youtube-dl youtube-dl.sh ytpodders ffmpeg ffprobe
+
+  ```
+
+  * [Linux](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_linux_v1.1.0.zip). Remember to
+
+```
+chmod a+rx youtube-dl youtube-dl.sh ytpodders ffmpeg ffprobe
+
+```
+
 * Unzip into a directory of your choice
 * Go to https://ytpodders.com and follow the Authorisation flow to get an access token
 * Copy the access token provided above to the obvious place in client_conf.json
 * Open a CMD prompt or shell and cd to the directory where you unzipped ytpodders
-* Add subscriptions to each of your fave YouTubers using
+* Add subscriptions to each of your favourite YouTubers using
 
 ```
 ytpodders add https://www.youtube.com/url_of_your_fave_youtuber
@@ -104,6 +116,9 @@ TODO
 - [ ] Automatically do the Auth flow and save client_conf.json for non-technical users
 - [ ] Use the Web App to add/remove/manage subscriptions for very non-technical users
 
+## Release History
+* 2016-05-02 - V1.0.0 - Initial release
+* 2016-05-11 - V1.1.0 - Replaced SQLite/sqlx with BoltDB/storm for data store. Added simple build script for Windows.
 
 ## Notes to self on Systemd, Caddy and YTPodders
 

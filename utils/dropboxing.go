@@ -9,12 +9,12 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/stacktic/dropbox"
+
 	"fmt"
 	"os"
 
 	"strings"
-
-	"github.com/stacktic/dropbox"
 )
 
 // Configuration from conf.json
@@ -22,7 +22,7 @@ type Configuration struct {
 	Token string `json:"token"`
 }
 
-var db *dropbox.Dropbox
+var drpbx *dropbox.Dropbox
 var dropboxLink *dropbox.Link
 var err error
 
@@ -46,12 +46,12 @@ func GetDropboxFolder() (string, error) {
 	clientsecret = "placeholder"
 	token = config.Token
 
-	db = dropbox.NewDropbox()
-	db.SetAppInfo(clientid, clientsecret)
-	db.SetAccessToken(token)
+	drpbx = dropbox.NewDropbox()
+	drpbx.SetAppInfo(clientid, clientsecret)
+	drpbx.SetAccessToken(token)
 
 	folder := "podcasts"
-	if _, err = db.CreateFolder(folder); err != nil {
+	if _, err = drpbx.CreateFolder(folder); err != nil {
 		if err.Error() != "Cannot create folder 'podcasts' because a file or folder already exists at path '/podcasts'" {
 			fmt.Printf("Error creating folder %s: %s\n", folder, err)
 		}
@@ -61,7 +61,7 @@ func GetDropboxFolder() (string, error) {
 
 	// Checking for the existence of (on Windows only obvs) %APPDATA%\Dropbox\host.db
 	// If it exists then read it and base64 decode the second line of its contents to get the root path of the Dropbox files for this user
-	// Then just do a local OS file copy to the right path instead of using db.UploadFile
+	// Then just do a local OS file copy to the right path instead of using drpbx.UploadFile
 	if _, err = os.Stat(os.Getenv("LOCALAPPDATA") + "\\Dropbox\\host.db"); err == nil {
 		fmt.Println("Running in Windows Local Dropbox Mode")
 
@@ -134,7 +134,7 @@ func CopyRemotelyToDropbox(srcFile string, destPath string) error {
 
 	// fmt.Printf("Running in Remote Dropbox Mode\n")
 
-	if _, err = db.UploadFile(srcFile, destPath, true, rev); err != nil {
+	if _, err = drpbx.UploadFile(srcFile, destPath, true, rev); err != nil {
 		fmt.Printf("Error uploading file: %s\n", err)
 		return err
 	}
@@ -175,7 +175,7 @@ func GetDropboxURLWhenSyncComplete(destFile string) (string, error) {
 func GetDropboxURL(destFile string) (string, error) {
 	//fmt.Println(destFile)
 	// Need to get Download URL of the Dropbox file so I can add to rss.xml
-	if dropboxLink, err = db.Shares(destFile, false); err != nil {
+	if dropboxLink, err = drpbx.Shares(destFile, false); err != nil {
 		fmt.Printf("dropboxLink: %s\n", dropboxLink.URL)
 		fmt.Printf("%s: %s\n", destFile, err)
 		return "", err

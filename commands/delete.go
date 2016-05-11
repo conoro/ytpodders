@@ -27,7 +27,7 @@ func SubDeleteRun(cmd *cobra.Command, args []string) {
 
 	var ytSubscription YTSubscription
 	err = db.One("ID", args[0], &ytSubscription)
-	if err != nil {
+	if err != nil && err.Error() != "bucket YTSubscription not found" && err.Error() != "bucket YTSubscriptionEntry not found" {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
@@ -41,7 +41,7 @@ func SubDeleteRun(cmd *cobra.Command, args []string) {
 	// query
 	var ytSubscriptions []YTSubscription
 	err = db.All(&ytSubscriptions)
-	if err != nil {
+	if err != nil && err.Error() != "bucket YTSubscription not found" && err.Error() != "bucket YTSubscriptionEntry not found" {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
