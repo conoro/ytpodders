@@ -29,3 +29,5 @@ cd zips
 gof3r cp --endpoint s3-eu-west-1.amazonaws.com --acl public-read ytpodders_windows_%RELEASE%.zip s3://ytpodders/dist/zips/ytpodders_windows_%RELEASE%.zip
 gof3r cp --endpoint s3-eu-west-1.amazonaws.com --acl public-read ytpodders_mac_%RELEASE%.zip s3://ytpodders/dist/zips/ytpodders_mac_%RELEASE%.zip
 gof3r cp --endpoint s3-eu-west-1.amazonaws.com --acl public-read ytpodders_linux_%RELEASE%.zip s3://ytpodders/dist/zips/ytpodders_linux_%RELEASE%.zip
+
+:: TODO INVALIDATE ON S3 to get new versions?
