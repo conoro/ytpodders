@@ -122,8 +122,9 @@ func RootRun(cmd *cobra.Command, args []string) {
 			//fmt.Println(item.Title)
 			if RSSEntryInDB(item.Link, ytSubscriptionEntries) == false {
 
-				args1 := []string{"-v", "--extract-audio", "--audio-format", "mp3", "-o", "./podcasts/%(uploader)s/%(title)s.%(ext)s", item.Link}
+				args1 := []string{"-v", "--restrict-filenames", "--extract-audio", "--audio-format", "mp3", "-o", "./podcasts/%(uploader)s/%(title)s.%(ext)s", item.Link}
 				cmd := exec.Command(vidcmd, args1...)
+				//fmt.Println(args1)
 
 				var out bytes.Buffer
 				cmd.Stdout = &out
@@ -140,10 +141,11 @@ func RootRun(cmd *cobra.Command, args []string) {
 						ytdlPath = strings.Split(scanner.Text(), ": ")[1]
 					}
 				}
+				//fmt.Println(ytdlPath)
 
 				mp3FileLocalStyle := ytdlPath
 				mp3FileRemoteStyle := "/" + strings.Replace(ytdlPath, "\\", "/", -1)
-				// fmt.Println(mp3FileLocalStyle)
+				//fmt.Println(mp3FileLocalStyle)
 				// fmt.Println(mp3FileRemoteStyle)
 
 				fileSize, _ = getFileSize(mp3FileLocalStyle)
