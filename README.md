@@ -6,15 +6,15 @@ YTPodders creates subscribable MP3 podcasts, for your personal use, from YouTube
 
 ## End-User Installation and First Time Run
 * Download the App (and all of the tools) as one zip file here:
-  * [Windows](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_windows_v1.1.0.zip)
-  * [Mac](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_mac_v1.1.0.zip). You need Python already installed and remember to
+  * [Windows](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_windows_v1.1.1.zip)
+  * [Mac](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_mac_v1.1.1.zip). You need Python already installed and remember to
 
   ```
   chmod a+rx youtube-dl youtube-dl.sh ytpodders ffmpeg ffprobe
 
   ```
 
-  * [Linux](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_linux_v1.1.0.zip). Remember to
+  * [Linux](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_linux_v1.1.1.zip). Remember to
 
 ```
 chmod a+rx youtube-dl youtube-dl.sh ytpodders ffmpeg ffprobe
@@ -119,6 +119,7 @@ TODO
 ## Release History
 * 2016-05-02 - V1.0.0 - Initial release
 * 2016-05-11 - V1.1.0 - Replaced SQLite/sqlx with BoltDB/storm for data store. Added simple build script for Windows.
+* 2016-08-10 - V1.1.1 - Quick hack to handle filenames with non-ascii characters due to youtube-dl oddness.
 
 ## Notes to self on Systemd, Caddy and YTPodders
 
