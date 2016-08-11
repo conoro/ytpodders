@@ -6,15 +6,15 @@ YTPodders creates subscribable MP3 podcasts, for your personal use, from YouTube
 
 ## End-User Installation and First Time Run
 * Download the App (and all of the tools) as one zip file here:
-  * [Windows](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_windows_v1.1.1.zip)
-  * [Mac](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_mac_v1.1.1.zip). You need Python already installed and remember to
+  * [Windows](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_windows_v1.1.2.zip)
+  * [Mac](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_mac_v1.1.2.zip). You need Python already installed and remember to
 
   ```
   chmod a+rx youtube-dl youtube-dl.sh ytpodders ffmpeg ffprobe
 
   ```
 
-  * [Linux](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_linux_v1.1.1.zip). Remember to
+  * [Linux](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_linux_v1.1.2.zip). Remember to
 
 ```
 chmod a+rx youtube-dl youtube-dl.sh ytpodders ffmpeg ffprobe
