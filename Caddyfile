@@ -5,3 +5,11 @@ ytpodders.com {
 bollox.ytpodders.com {
 	proxy / localhost:1337
 }
+
+bandonfews.ytpodders.com {
+        proxy / localhost:8333
+}
+
+rss.ytpodders.com {
+        proxy / localhost:8111
+}
