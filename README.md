@@ -6,15 +6,15 @@ YTPodders creates subscribable MP3 podcasts, for your personal use, from YouTube
 
 ## End-User Installation and First Time Run
 * Download the App (and all of the tools) as one zip file here:
-  * [Windows](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_windows_v1.1.0.zip)
-  * [Mac](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_mac_v1.1.0.zip). You need Python already installed and remember to
+  * [Windows](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_windows_v1.1.2.zip)
+  * [Mac](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_mac_v1.1.2.zip). You need Python already installed and remember to
 
   ```
   chmod a+rx youtube-dl youtube-dl.sh ytpodders ffmpeg ffprobe
 
   ```
 
-  * [Linux](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_linux_v1.1.0.zip). Remember to
+  * [Linux](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_linux_v1.1.2.zip). Remember to
 
 ```
 chmod a+rx youtube-dl youtube-dl.sh ytpodders ffmpeg ffprobe
@@ -48,7 +48,7 @@ ytpodders.exe or ./ytpodders, depending on your platform
 * It takes just a minute to add ytpodders to the Windows Task Scheduler so that it runs automatically whenever you want. Ditto as a cronjob on Linux.
 
 ## Developer Installation
-It uses [youtube-dl](https://rg3.github.io/youtube-dl/) and [ffmpeg](https://www.ffmpeg.org/) to do all of the heavy lifting and stores all of your subscriptions in SQLite.
+It uses [youtube-dl](https://rg3.github.io/youtube-dl/) and [ffmpeg](https://www.ffmpeg.org/) to do all of the heavy lifting and stores all of your subscriptions in BoltDB.
 
 You can download the tools here:
 
@@ -119,6 +119,8 @@ TODO
 ## Release History
 * 2016-05-02 - V1.0.0 - Initial release
 * 2016-05-11 - V1.1.0 - Replaced SQLite/sqlx with BoltDB/storm for data store. Added simple build script for Windows.
+* 2016-08-10 - V1.1.1 - Quick hack to handle filenames with non-ascii characters due to youtube-dl oddness.
+* 2016-08-11 - V1.1.2 - Updated to latest version of youtube-dl to handle download errors on some videos
 
 ## Notes to self on Systemd, Caddy and YTPodders
 
