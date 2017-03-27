@@ -14,6 +14,8 @@ ytpodders.db
 ytpodders.boltdb
 rss.xml
 dist
+.idea
+debug
 
 # Created by https://www.gitignore.io/api/node,go,windows,osx,linux,emacs,sublimetext
 
