@@ -96,14 +96,14 @@ func RootRun(cmd *cobra.Command, args []string) {
 		if err != nil && err.Error() != "bucket YTSubscription not found" && err.Error() != "bucket YTSubscriptionEntry not found" {
 			fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		}
-		// fmt.Println(subscription)
+		//fmt.Println(subscription)
 		//fmt.Println(ytSubscriptionEntries)
 
 		var feedURL string
 
 		split := strings.Split(subscription.SubURL, "/")
 		feedid := split[len(split)-1]
-		// fmt.Println(feedid)
+		//fmt.Println(feedid)
 
 		if strings.Contains(subscription.SubURL, "channel") {
 			feedURL = "https://www.youtube.com/feeds/videos.xml?channel_id=" + feedid
@@ -119,11 +119,12 @@ func RootRun(cmd *cobra.Command, args []string) {
 		// TODO: Make limit configurable and handle situation where limit > range
 		feedSlice := feed.Items[:5]
 		for _, item := range feedSlice {
-			//fmt.Println(item.Title)
+			fmt.Println(item.Title)
 			if RSSEntryInDB(item.Link, ytSubscriptionEntries) == false {
 
-				args1 := []string{"-v", "--restrict-filenames", "--extract-audio", "--audio-format", "mp3", "-o", "./podcasts/%(uploader)s/%(title)s.%(ext)s", item.Link}
+				args1 := []string{"-v", "--newline", "--restrict-filenames", "--extract-audio", "--audio-format", "mp3", "-o", "./podcasts/%(uploader)s/%(title)s.%(ext)s", item.Link}
 				cmd := exec.Command(vidcmd, args1...)
+
 				//fmt.Println(args1)
 
 				var out bytes.Buffer
@@ -134,6 +135,8 @@ func RootRun(cmd *cobra.Command, args []string) {
 					os.Exit(1)
 				}
 
+				defer cmd.Wait()
+
 				var ytdlPath string
 				scanner := bufio.NewScanner(&out)
 				for scanner.Scan() {
@@ -142,11 +145,12 @@ func RootRun(cmd *cobra.Command, args []string) {
 					}
 				}
 				//fmt.Println(ytdlPath)
+				//fmt.Println(strings.Split(scanner.Text(), ": "))
 
 				mp3FileLocalStyle := ytdlPath
 				mp3FileRemoteStyle := "/" + strings.Replace(ytdlPath, "\\", "/", -1)
 				//fmt.Println(mp3FileLocalStyle)
-				// fmt.Println(mp3FileRemoteStyle)
+				//fmt.Println(mp3FileRemoteStyle)
 
 				fileSize, _ = getFileSize(mp3FileLocalStyle)
 

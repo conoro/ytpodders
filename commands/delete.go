@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/asdine/storm"
 	"github.com/spf13/cobra"
@@ -21,20 +22,21 @@ var SubDeleteCmd = &cobra.Command{
 func SubDeleteRun(cmd *cobra.Command, args []string) {
 	db, err := storm.Open("ytpodders.boltdb", storm.AutoIncrement())
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintf(os.Stderr, "1 error: %v\n", err)
 	}
 	defer db.Close()
 
 	var ytSubscription YTSubscription
-	err = db.One("ID", args[0], &ytSubscription)
+	delID, _ := strconv.Atoi(args[0])
+	err = db.One("ID", delID, &ytSubscription)
 	if err != nil && err.Error() != "bucket YTSubscription not found" && err.Error() != "bucket YTSubscriptionEntry not found" {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		fmt.Fprintf(os.Stderr, "2 error: %v\n", err)
 		os.Exit(1)
 	}
 
 	err = db.Remove(&ytSubscription)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		fmt.Fprintf(os.Stderr, "3 error: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -42,7 +44,7 @@ func SubDeleteRun(cmd *cobra.Command, args []string) {
 	var ytSubscriptions []YTSubscription
 	err = db.All(&ytSubscriptions)
 	if err != nil && err.Error() != "bucket YTSubscription not found" && err.Error() != "bucket YTSubscriptionEntry not found" {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		fmt.Fprintf(os.Stderr, "4 error: %v\n", err)
 		os.Exit(1)
 	}
 
