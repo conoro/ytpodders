@@ -6,15 +6,15 @@ YTPodders creates subscribable MP3 podcasts, for your personal use, from YouTube
 
 ## End-User Installation and First Time Run
 * Download the App (and all of the tools) as one zip file here:
-  * [Windows](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_windows_v1.1.3.zip)
-  * [Mac](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_mac_v1.1.3.zip). You need Python already installed and remember to
+  * [Windows](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_windows_v2.0.0.zip)
+  * [Mac](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_mac_v2.0.0.zip). You need Python already installed and remember to
 
   ```
   chmod a+rx youtube-dl youtube-dl.sh ytpodders ffmpeg ffprobe
 
   ```
 
-  * [Linux](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_linux_v1.1.3.zip). Remember to
+  * [Linux](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_linux_v2.0.0.zip). Remember to
 
 ```
 chmod a+rx youtube-dl youtube-dl.sh ytpodders ffmpeg ffprobe
@@ -105,7 +105,7 @@ TODO
 - [ ] validate removal by ID
 - [ ] remove all MP3s locally and on Dropbox when deleting
 - [ ] remove all the entries in subscription_entries when deleting
-- [ ] Generate releases and upload to S3 using some CI tool (OSX a challenge)
+- [x] Generate releases and upload to S3 using some CI tool (OSX a challenge)
 - [ ] Automatically do the Auth flow and save client_conf.json for non-technical users
 - [ ] Use the Web App to add/remove/manage subscriptions for very non-technical users
 
@@ -117,18 +117,3 @@ TODO
 * 2017-03-27 - V1.1.3 - Updated to latest version of youtube-dl. Fixed delete command.
 * 2017-10-14 - V2.0.0 - Updated to Dropbox V2 API. Removed server command and replaced with simple static flow. Updated youtube-dl
 
-
-## Notes to self on Systemd, Caddy and YTPodders
-
-```bash
-sudo setcap cap_net_bind_service=+ep ~/gitwork/go/bin/caddy
-cd ~/gitwork/go/src/github.com/conoro/ytpodders
-sudo cp *.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable caddy
-sudo systemctl enable ytpodders
-sudo systemctl start caddy
-sudo systemctl start ytpodders
-sudo systemctl status caddy
-sudo systemctl status ytpodders
-```
