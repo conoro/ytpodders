@@ -50,8 +50,10 @@ func AddRun(cmd *cobra.Command, args []string) {
 	}
 	defer db.Close()
 
+	s := strings.TrimSuffix(args[0], "/")
+
 	ytsub := YTSubscription{
-		SubURL:    args[0],
+		SubURL:    s,
 		SubTitle:  title,
 		SubStatus: "enabled",
 	}
@@ -60,8 +62,8 @@ func AddRun(cmd *cobra.Command, args []string) {
 
 	var ytSubscriptions []YTSubscription
 	err = db.All(&ytSubscriptions)
-	if err != nil && err.Error() != "bucket YTSubscription not found" && err.Error() != "bucket YTSubscriptionEntry not found" {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+	if err != nil && err.Error() != "bucket YTSubscription not found" && strings.Contains(err.Error(), "YTSubscriptionEntry") == false {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err.Error())
 		os.Exit(1)
 	}
 

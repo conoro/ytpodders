@@ -65,7 +65,7 @@ func RootRun(cmd *cobra.Command, args []string) {
 
 	dropboxFolder, err = utils.GetDropboxFolder()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		fmt.Fprintf(os.Stderr, "error12: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -78,23 +78,23 @@ func RootRun(cmd *cobra.Command, args []string) {
 
 	db, err := storm.Open("ytpodders.boltdb", storm.AutoIncrement())
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintf(os.Stderr, "error1: %v\n", err)
 	}
 	defer db.Close()
 
 	// query
 	var ytSubscriptions []YTSubscription
 	err = db.All(&ytSubscriptions)
-	if err != nil && err.Error() != "bucket YTSubscription not found" && err.Error() != "bucket YTSubscriptionEntry not found" {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+	if err != nil && err.Error() != "bucket YTSubscription not found" && strings.Contains(err.Error(), "YTSubscriptionEntry") == false {
+		fmt.Fprintf(os.Stderr, "error2: %v\n", err)
 	}
 
 	for _, subscription := range ytSubscriptions {
 
 		var ytSubscriptionEntries []YTSubscriptionEntry
 		err = db.Find("Subscription", subscription.ID, &ytSubscriptionEntries)
-		if err != nil && err.Error() != "bucket YTSubscription not found" && err.Error() != "bucket YTSubscriptionEntry not found" {
-			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		if err != nil && err.Error() != "bucket YTSubscription not found" && strings.Contains(err.Error(), "YTSubscriptionEntry") == false {
+			fmt.Fprintf(os.Stderr, "error3: %v\n", err)
 		}
 		//fmt.Println(subscription)
 		//fmt.Println(ytSubscriptionEntries)
@@ -110,9 +110,9 @@ func RootRun(cmd *cobra.Command, args []string) {
 		} else {
 			feedURL = "https://www.youtube.com/feeds/videos.xml?user=" + feedid
 		}
-		feed, error := rss.Fetch(feedURL)
-		if error != nil {
-			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		feed, err := rss.Fetch(feedURL)
+		if err != nil && err.Error() != "bucket YTSubscription not found" && strings.Contains(err.Error(), "YTSubscriptionEntry") == false {
+			fmt.Fprintf(os.Stderr, "error11: %v\n", err)
 			os.Exit(1)
 		}
 
@@ -131,7 +131,7 @@ func RootRun(cmd *cobra.Command, args []string) {
 				cmd.Stdout = &out
 				err = cmd.Run()
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "error: %v\n", err)
+					fmt.Fprintf(os.Stderr, "error10: %v\n", err)
 					os.Exit(1)
 				}
 
@@ -165,14 +165,14 @@ func RootRun(cmd *cobra.Command, args []string) {
 					// Running on OSX or Linux or somewhere where Dropbox is not installed
 					err = utils.CopyRemotelyToDropbox("."+mp3FileRemoteStyle, mp3FileRemoteStyle)
 					if err != nil {
-						fmt.Fprintf(os.Stderr, "error: %v\n", err)
+						fmt.Fprintf(os.Stderr, "error9: %v\n", err)
 						os.Exit(1)
 					}
 				}
 				var dropboxURL string
 				dropboxURL, err = utils.GetDropboxURLWhenSyncComplete(mp3FileRemoteStyle)
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "error: %v\n", err)
+					fmt.Fprintf(os.Stderr, "error8: %v\n", err)
 					os.Exit(1)
 				}
 				// fmt.Println(dropboxURL)
@@ -192,7 +192,7 @@ func RootRun(cmd *cobra.Command, args []string) {
 
 				err = db.Save(&entry)
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "error: %v\n", err)
+					fmt.Fprintf(os.Stderr, "error4: %v\n", err)
 				}
 
 			}
@@ -204,7 +204,7 @@ func RootRun(cmd *cobra.Command, args []string) {
 	var ytAllSubscriptionEntries []YTSubscriptionEntry
 	err = db.AllByIndex("Date", &ytAllSubscriptionEntries)
 	if err != nil && err.Error() != "bucket YTSubscription not found" && err.Error() != "bucket YTSubscriptionEntry not found" {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		fmt.Fprintf(os.Stderr, "error5: %v\n", err)
 	}
 
 	for _, ytItem := range ytAllSubscriptionEntries {
@@ -215,7 +215,7 @@ func RootRun(cmd *cobra.Command, args []string) {
 	// Create and update rss.xml
 	_, err = generateRSS()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		fmt.Fprintf(os.Stderr, "error7: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -239,7 +239,7 @@ func RootRun(cmd *cobra.Command, args []string) {
 	// When Dropbox has synced, return the URL of rss.xml to the User
 	RSSFileURL, err := utils.GetDropboxURLWhenSyncComplete("/rss.xml")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		fmt.Fprintf(os.Stderr, "error6: %v\n", err)
 		os.Exit(1)
 	}
 	fmt.Printf("\n\nSubscribe to this RSS URL in your Podcasting App: %s\n\n", RSSFileURL)

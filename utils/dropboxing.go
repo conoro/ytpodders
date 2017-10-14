@@ -214,7 +214,7 @@ func GetDropboxURL(destFile string) (string, error) {
 
 	_, err = dbx.CreateSharedLinkWithSettings(arg)
 	if err != nil {
-		fmt.Println("Problem setting up Dropbox link share. Probably already exists")
+		fmt.Println("Problem setting up Dropbox link share. Safe to ignore. Link probably already exists")
 	}
 
 	arg2 := sharing.NewListSharedLinksArg()
@@ -224,6 +224,7 @@ func GetDropboxURL(destFile string) (string, error) {
 	res, err := dbx2.ListSharedLinks(arg2)
 	if err != nil {
 		fmt.Println("Problem getting Dropbox Link:", err)
+		return "", err
 	}
 
 	var extractURL string
