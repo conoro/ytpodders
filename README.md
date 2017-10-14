@@ -60,7 +60,7 @@ All the generated MP3s are stored in your Dropbox Folder and an rss.xml file is 
 
 As it is written in Go, it should work on every platform where youtube-dl and ffmpeg are available.
 
-### Web Server
+### Auth Flow
 * Go to https://www.dropbox.com/developers/apps/create
 * Login with your Dropbox account
 * In "Choose an API" Click the Dropbox API option
@@ -70,18 +70,12 @@ As it is written in Go, it should work on every platform where youtube-dl and ff
 * Note the App Key
 * Click "Show" on App Secret and note it too
 * In redirect URL enter http://127.0.0.1:7000 and/or whatever server URL you'll be using
-* Download, install and configure [Go](http://www.golang.org/)
-* On your Web Server (even local server) Download the [ytpodders source code](https://github.com/conoro/ytpodders) via git clone or [zip download](https://github.com/conoro/ytpodders/archive/master.zip) into $GOPATH/src/github.com/conoro/ytpodders
-* Rename server_conf_example.json to server_conf.json
-* Edit server_conf.json and insert the values for App Key and Secret
-* Set serverurl. Use http://127.0.0.1:7000 if running locally
-* Set serverport if running behind something like Caddy or NGINX
-* Change oauthstatestring to something random
-* go build github.com/conoro/ytpodders to create the ytpodders binary
-* go server
-* You can now browse to http://url_of_your_server and follow the auth flow to get a token. Note it down
+* On your client machine download the [ytpodders source code](https://github.com/conoro/ytpodders) via git clone or [zip download](https://github.com/conoro/ytpodders/archive/master.zip) into $GOPATH/src/github.com/conoro/ytpodders
+* Run a local web-server like [Caddy](https://caddyserver.com/) in the static directory
+* You can now browse to http://url_of_your_local_server and follow the auth flow to get a token. Note it down
 
 ### Client
+* Download, install and configure [Go](http://www.golang.org/)
 * On your client machine download the [ytpodders source code](https://github.com/conoro/ytpodders) via git clone or [zip download](https://github.com/conoro/ytpodders/archive/master.zip) into $GOPATH/src/github.com/conoro/ytpodders
 * Download youtube-dl, ffmpeg and ffprobe as above to that directory too
 * go build github.com/conoro/ytpodders to create the ytpodders binary
@@ -95,7 +89,6 @@ You can use the following commands:
 - [x] add - add a subscription. Pass it the URL of a YouTube Channel or User (TODO: sanitize input)
 - [x] list - list all subscriptions
 - [x] delete - delete a subscription by ID
-- [x] server - run a web-server as a developer which lets users authorise the app to access Dropbox
 
 TODO
 - [ ] dryrun - same as run except nothing is downloaded and the database is not modified but it lists what it would do
@@ -121,7 +114,8 @@ TODO
 * 2016-05-11 - V1.1.0 - Replaced SQLite/sqlx with BoltDB/storm for data store. Added simple build script for Windows.
 * 2016-08-10 - V1.1.1 - Quick hack to handle filenames with non-ascii characters due to youtube-dl oddness.
 * 2016-08-11 - V1.1.2 - Updated to latest version of youtube-dl to handle download errors on some videos
-* 2016-03-27 - V1.1.3 - Updated to latest version of youtube-dl. Fixed delete command.
+* 2017-03-27 - V1.1.3 - Updated to latest version of youtube-dl. Fixed delete command.
+* 2017-10-14 - V2.0.0 - Updated to Dropbox V2 API. Removed server command and replaced with simple static flow. Updated youtube-dl
 
 
 ## Notes to self on Systemd, Caddy and YTPodders

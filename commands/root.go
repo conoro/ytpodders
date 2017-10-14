@@ -237,7 +237,7 @@ func RootRun(cmd *cobra.Command, args []string) {
 	}
 
 	// When Dropbox has synced, return the URL of rss.xml to the User
-	RSSFileURL, err := utils.GetDropboxURLWhenSyncComplete("rss.xml")
+	RSSFileURL, err := utils.GetDropboxURLWhenSyncComplete("/rss.xml")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
@@ -261,11 +261,6 @@ func addEntrytoRSSXML(ytItem YTSubscriptionEntry) error {
 	//	layOut := "2006-01-02 15:04:05-07:00"
 	//	timeStamp, err := time.Parse(layOut, ytItem.Date)
 	timeStamp := ytItem.Date
-
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
 
 	//TODO Add Icon to feed
 	//TODO Either fix the RSS feed or change the Atom file to atom.xml
@@ -296,7 +291,7 @@ func generateRSS() (string, error) {
 	rssOut := []byte(rss)
 
 	rssFile := "rss.xml"
-	err = ioutil.WriteFile(rssFile, rssOut, 0644)
+	err := ioutil.WriteFile(rssFile, rssOut, 0644)
 	if err != nil {
 		return "", err
 	}

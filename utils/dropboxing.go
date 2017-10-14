@@ -7,14 +7,17 @@ import (
 	"errors"
 	"io"
 	"path/filepath"
+	"strings"
 	"time"
 
-	"github.com/stacktic/dropbox"
+	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox"
+	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/files"
+	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/sharing"
+	"github.com/dustin/go-humanize"
+	"github.com/mitchellh/ioprogress"
 
 	"fmt"
 	"os"
-
-	"strings"
 )
 
 // Configuration from conf.json
@@ -22,41 +25,27 @@ type Configuration struct {
 	Token string `json:"token"`
 }
 
-var drpbx *dropbox.Dropbox
-var dropboxLink *dropbox.Link
 var err error
 
 // GetDropboxFolder figures out the local Dropbox folder in the FS. Windows only at the moment
 func GetDropboxFolder() (string, error) {
-
-	var clientid, clientsecret, token string
-	var dropboxFolder string
-	// Read configuration from conf.json
-	conffile, _ := os.Open("client_conf.json")
-	decoder := json.NewDecoder(conffile)
-	config := Configuration{}
-	err = decoder.Decode(&config)
+	config, err := GetConfig()
 	if err != nil {
 		fmt.Println("config error:", err)
 		return "", err
 	}
 
-	// Using placeholders since you just need token
-	clientid = "placeholder"
-	clientsecret = "placeholder"
-	token = config.Token
+	dbx := files.New(config)
+	dst := "/podcasts"
 
-	drpbx = dropbox.NewDropbox()
-	drpbx.SetAppInfo(clientid, clientsecret)
-	drpbx.SetAccessToken(token)
+	arg := files.NewCreateFolderArg(dst)
 
-	folder := "podcasts"
-	if _, err = drpbx.CreateFolder(folder); err != nil {
-		if err.Error() != "Cannot create folder 'podcasts' because a file or folder already exists at path '/podcasts'" {
-			fmt.Printf("Error creating folder %s: %s\n", folder, err)
+	if _, err = dbx.CreateFolderV2(arg); err != nil {
+		if strings.Contains(err.Error(), "/podcasts") {
+			fmt.Printf("Error creating folder %s: %s\n", dst, err.Error())
 		}
 	} else {
-		fmt.Printf("Folder %s successfully created\n", folder)
+		fmt.Printf("Folder %s successfully created\n", dst)
 	}
 
 	// Checking for the existence of (on Windows only obvs) %APPDATA%\Dropbox\host.db
@@ -86,7 +75,7 @@ func GetDropboxFolder() (string, error) {
 		if err != nil {
 			return "", err
 		}
-		dropboxFolder = string(sDec)
+		dropboxFolder := string(sDec)
 		//fmt.Println(dropboxFolder)
 		return dropboxFolder, nil
 	}
@@ -130,14 +119,50 @@ func CopyLocallyToDropbox(srcFile string, destFolder string) error {
 
 // CopyRemotelyToDropbox uploads the file to Dropbox - Should work on Linux and OSX too but doesn't yet
 func CopyRemotelyToDropbox(srcFile string, destPath string) error {
-	var rev string
 
-	// fmt.Printf("Running in Remote Dropbox Mode\n")
+	fmt.Printf("Running in Remote Dropbox Mode\n")
 
-	if _, err = drpbx.UploadFile(srcFile, destPath, true, rev); err != nil {
-		fmt.Printf("Error uploading file: %s\n", err)
+	config, err := GetConfig()
+	if err != nil {
+		fmt.Println("Config error:", err)
 		return err
 	}
+
+	contents, err := os.Open(srcFile)
+	defer contents.Close()
+	if err != nil {
+		return err
+	}
+
+	contentsInfo, err := contents.Stat()
+	if err != nil {
+		return err
+	}
+
+	progressbar := &ioprogress.Reader{
+		Reader: contents,
+		DrawFunc: ioprogress.DrawTerminalf(os.Stderr, func(progress, total int64) string {
+			return fmt.Sprintf("Uploading %s/%s",
+				humanize.IBytes(uint64(progress)), humanize.IBytes(uint64(total)))
+		}),
+		Size: contentsInfo.Size(),
+	}
+
+	commitInfo := files.NewCommitInfo(destPath)
+	commitInfo.Mode.Tag = "overwrite"
+	dbx := files.New(config)
+
+	// The Dropbox API only accepts timestamps in UTC with second precision.
+	commitInfo.ClientModified = time.Now().UTC().Round(time.Second)
+
+	if _, err = dbx.Upload(commitInfo, progressbar); err != nil {
+		return err
+	}
+
+	//	if _, err = drpbx.UploadFile(srcFile, destPath, true, rev); err != nil {
+	//		fmt.Printf("Error uploading file: %s\n", err)
+	//		return err
+	//	}
 	fmt.Printf("File successfully uploaded: %s\n", srcFile)
 	return nil
 }
@@ -173,15 +198,65 @@ func GetDropboxURLWhenSyncComplete(destFile string) (string, error) {
 
 // GetDropboxURL retrieves the direct download URL for a file
 func GetDropboxURL(destFile string) (string, error) {
-	//fmt.Println(destFile)
-	// Need to get Download URL of the Dropbox file so I can add to rss.xml
-	if dropboxLink, err = drpbx.Shares(destFile, false); err != nil {
-		fmt.Printf("dropboxLink: %s\n", dropboxLink.URL)
-		fmt.Printf("%s: %s\n", destFile, err)
+	var err error
+
+	config, err := GetConfig()
+	if err != nil {
+		fmt.Println("Config error:", err)
 		return "", err
 	}
-	s := strings.Split(dropboxLink.URL, "?")
+
+	//fmt.Println(destFile)
+
+	arg := sharing.NewCreateSharedLinkWithSettingsArg(destFile)
+
+	dbx := sharing.New(config)
+
+	_, err = dbx.CreateSharedLinkWithSettings(arg)
+	if err != nil {
+		fmt.Println("Problem setting up Dropbox link share. Probably already exists")
+	}
+
+	arg2 := sharing.NewListSharedLinksArg()
+	arg2.Path = destFile
+	dbx2 := sharing.New(config)
+
+	res, err := dbx2.ListSharedLinks(arg2)
+	if err != nil {
+		fmt.Println("Problem getting Dropbox Link:", err)
+	}
+
+	var extractURL string
+	switch sl := res.Links[0].(type) {
+	case *sharing.FileLinkMetadata:
+		extractURL = sl.Url
+	default:
+		fmt.Printf("found unknown shared link type")
+	}
+
+	s := strings.Split(extractURL, "?")
 	dlLink := s[0] + "?raw=1"
+
 	//fmt.Printf("MP3 Direct download URL is: %s\n", dlLink)
 	return dlLink, nil
+}
+
+// GetConfig grabs the Dropbox token from client_conf.json and sets it up
+func GetConfig() (dropbox.Config, error) {
+	conffile, _ := os.Open("client_conf.json")
+	decoder := json.NewDecoder(conffile)
+	dbxconfig := Configuration{}
+
+	err := decoder.Decode(&dbxconfig)
+	if err != nil {
+		fmt.Println("config error:", err)
+	}
+
+	token := dbxconfig.Token
+
+	config := dropbox.Config{
+		Token:    token,
+		LogLevel: dropbox.LogOff, // if needed, set the desired logging level. Default is off
+	}
+	return config, err
 }
