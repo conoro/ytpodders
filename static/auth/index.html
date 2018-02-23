@@ -128,7 +128,7 @@
     showPageSection('pre-auth-section');
 
     // Set the login anchors href using dbx.getAuthenticationUrl()
-    var dbx = new Dropbox({
+    var dbx = new Dropbox.Dropbox({
       clientId: CLIENT_ID
     });
     var authUrl = dbx.getAuthenticationUrl('https://ytpodders.conoroneill.net/auth/');
