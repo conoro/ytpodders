@@ -22,7 +22,7 @@ chmod a+rx youtube-dl youtube-dl.sh ytpodders ffmpeg ffprobe
 ```
 
 * Unzip into a directory of your choice
-* Go to https://ytpodders.com and follow the Authorisation flow to get an access token
+* Go to https://ytpodders.conoroneill.net/ and follow the Authorisation flow to get an access token
 * Copy the access token provided above to the obvious place in client_conf.json
 * Open a CMD prompt or shell and cd to the directory where you unzipped ytpodders
 * Add subscriptions to each of your favourite YouTubers using
