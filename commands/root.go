@@ -42,7 +42,7 @@ type YTSubscriptionEntry struct {
 // RSSXML is used to build the rss.xml file which you subscribe to in your podcasting app
 var RSSXML = &feeds.Feed{
 	Title:       "YTPodders YouTube Podcasts",
-	Link:        &feeds.Link{Href: "https://ytpodders.com/"},
+	Link:        &feeds.Link{Href: "https://ytpodders.conoroneill.net/"},
 	Description: "YouTube Videos converted to Podcasts by YTPodders",
 	Author:      &feeds.Author{Name: "YTPodder", Email: "youtuber@example.com"},
 }
@@ -148,7 +148,7 @@ func RootRun(cmd *cobra.Command, args []string) {
 				//fmt.Println(strings.Split(scanner.Text(), ": "))
 
 				mp3FileLocalStyle := ytdlPath
-				mp3FileRemoteStyle := "/" + strings.Replace(ytdlPath, "\\", "/", -1)
+				mp3FileRemoteStyle := strings.Replace(ytdlPath, "\\", "/", -1)
 				//fmt.Println(mp3FileLocalStyle)
 				//fmt.Println(mp3FileRemoteStyle)
 
@@ -163,14 +163,14 @@ func RootRun(cmd *cobra.Command, args []string) {
 					}
 				} else {
 					// Running on OSX or Linux or somewhere where Dropbox is not installed
-					err = utils.CopyRemotelyToDropbox("."+mp3FileRemoteStyle, mp3FileRemoteStyle)
+					err = utils.CopyRemotelyToDropbox(mp3FileRemoteStyle, mp3FileRemoteStyle[1:])
 					if err != nil {
 						fmt.Fprintf(os.Stderr, "error9: %v\n", err)
 						os.Exit(1)
 					}
 				}
 				var dropboxURL string
-				dropboxURL, err = utils.GetDropboxURLWhenSyncComplete(mp3FileRemoteStyle)
+				dropboxURL, err = utils.GetDropboxURLWhenSyncComplete(mp3FileRemoteStyle[1:])
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "error8: %v\n", err)
 					os.Exit(1)
@@ -188,7 +188,7 @@ func RootRun(cmd *cobra.Command, args []string) {
 					FileSize:     fileSize,
 				}
 
-				fmt.Println(entry)
+				//fmt.Println(entry)
 
 				err = db.Save(&entry)
 				if err != nil {

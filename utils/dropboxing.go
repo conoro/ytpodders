@@ -13,7 +13,7 @@ import (
 	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox"
 	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/files"
 	"github.com/dropbox/dropbox-sdk-go-unofficial/dropbox/sharing"
-	"github.com/dustin/go-humanize"
+	humanize "github.com/dustin/go-humanize"
 	"github.com/mitchellh/ioprogress"
 
 	"fmt"
@@ -128,6 +128,9 @@ func CopyRemotelyToDropbox(srcFile string, destPath string) error {
 		return err
 	}
 
+	fmt.Println("Src: ", srcFile)
+	fmt.Println("Dest: ", destPath)
+
 	contents, err := os.Open(srcFile)
 	defer contents.Close()
 	if err != nil {
@@ -156,6 +159,7 @@ func CopyRemotelyToDropbox(srcFile string, destPath string) error {
 	commitInfo.ClientModified = time.Now().UTC().Round(time.Second)
 
 	if _, err = dbx.Upload(commitInfo, progressbar); err != nil {
+		fmt.Fprintf(os.Stderr, "DBX Error 1: %v\n", err)
 		return err
 	}
 
