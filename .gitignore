@@ -12,6 +12,7 @@ ffprobe
 ffprobe.exe
 ytpodders.db
 ytpodders.boltdb
+ytpodders.boltdb.lock
 youtube-dl
 rss.xml
 dist
