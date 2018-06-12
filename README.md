@@ -8,14 +8,14 @@ YTPodders creates subscribable MP3 podcasts, for your personal use, from YouTube
 
 * Download the App (and all of the tools) as one zip file here:
 
-  * [Windows](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_windows_v2.0.2.zip)
-  * [Mac](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_mac_v2.0.2.zip). You need Python already installed and remember to
+  * [Windows](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_windows_v2.0.3.zip)
+  * [Mac](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_mac_v2.0.3.zip). You need Python already installed and remember to
 
   ```
   chmod a+rx youtube-dl youtube-dl.sh ytpodders ffmpeg ffprobe
   ```
 
-  * [Linux](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_linux_v2.0.2.zip). Remember to
+  * [Linux](http://ytpodders.s3.amazonaws.com/dist/zips/ytpodders_linux_v2.0.3.zip). Remember to
 
 ```
 chmod a+rx youtube-dl youtube-dl.sh ytpodders ffmpeg ffprobe
@@ -126,3 +126,4 @@ TODO
 * 2017-10-14 - V2.0.0 - Updated to Dropbox V2 API. Removed server command and replaced with simple static flow. Updated youtube-dl
 * 2017-10-14 - V2.0.1 - Fix some bugs with Dropbox URLs
 * 2018-04-26 - V2.0.2 - Fixes to make it work on OSX again (and proably Linux but untested)
+* 2018-06-12 - V2.0.3 - Last release broke Windows. This should now work for Windows and OSX
