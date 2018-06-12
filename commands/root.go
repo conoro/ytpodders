@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"runtime"
 
 	"bufio"
 	"bytes"
@@ -110,6 +111,9 @@ func RootRun(cmd *cobra.Command, args []string) {
 		} else {
 			feedURL = "https://www.youtube.com/feeds/videos.xml?user=" + feedid
 		}
+
+		//fmt.Println(feedURL)
+
 		feed, err := rss.Fetch(feedURL)
 		if err != nil && err.Error() != "bucket YTSubscription not found" && strings.Contains(err.Error(), "YTSubscriptionEntry") == false {
 			fmt.Fprintf(os.Stderr, "error11: %v\n", err)
@@ -148,7 +152,12 @@ func RootRun(cmd *cobra.Command, args []string) {
 				//fmt.Println(strings.Split(scanner.Text(), ": "))
 
 				mp3FileLocalStyle := ytdlPath
-				mp3FileRemoteStyle := strings.Replace(ytdlPath, "\\", "/", -1)
+				var mp3FileRemoteStyle string
+				if runtime.GOOS == "windows" {
+					mp3FileRemoteStyle = "/" + strings.Replace(ytdlPath, "\\", "/", -1)
+				} else {
+					mp3FileRemoteStyle = strings.Replace(ytdlPath, "\\", "/", -1)
+				}
 				//fmt.Println(mp3FileLocalStyle)
 				//fmt.Println(mp3FileRemoteStyle)
 
@@ -170,7 +179,11 @@ func RootRun(cmd *cobra.Command, args []string) {
 					}
 				}
 				var dropboxURL string
-				dropboxURL, err = utils.GetDropboxURLWhenSyncComplete(mp3FileRemoteStyle[1:])
+				if runtime.GOOS == "windows" {
+					dropboxURL, err = utils.GetDropboxURLWhenSyncComplete(mp3FileRemoteStyle)
+				} else {
+					dropboxURL, err = utils.GetDropboxURLWhenSyncComplete(mp3FileRemoteStyle[1:])
+				}
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "error8: %v\n", err)
 					os.Exit(1)

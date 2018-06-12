@@ -210,7 +210,7 @@ func GetDropboxURL(destFile string) (string, error) {
 		return "", err
 	}
 
-	//fmt.Println(destFile)
+	fmt.Println(destFile)
 
 	arg := sharing.NewCreateSharedLinkWithSettingsArg(destFile)
 
@@ -232,6 +232,7 @@ func GetDropboxURL(destFile string) (string, error) {
 	}
 
 	var extractURL string
+	fmt.Println(res)
 	switch sl := res.Links[0].(type) {
 	case *sharing.FileLinkMetadata:
 		extractURL = sl.Url
